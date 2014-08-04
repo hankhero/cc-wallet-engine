@@ -1,0 +1,132 @@
+module.exports = function(grunt) {
+  grunt.initConfig({
+    pkg: grunt.file.readJSON('package.json'),
+    browserify: {
+      production: {
+        src: ['.src_production/index.js'],
+        dest: 'cc-wallet-engine.js',
+        options: {
+          bundleOptions: {
+            standalone: 'ccWalletEngine'
+          }
+        }
+      },
+      test: {
+        src: ['test/*.js'],
+        dest: 'cc-wallet-engine.test.js'
+      }
+    },
+    clean: {
+      builds: {
+        src: ['cc-wallet-engine.js', 'cc-wallet-engine.min.js', 'cc-wallet-engine.test.js']
+      },
+      production: {
+        src: ['.src_production']
+      }
+    },
+    copy: {
+      production: {
+        expand: true,
+        cwd: 'src',
+        src: '**',
+        dest: '.src_production'
+      }
+    },
+    jshint: {
+      options: {
+        asi: true,
+        camelcase: true,
+        freeze: true,
+        immed: true,
+        indent: 2,
+        latedef: true,
+        maxcomplexity: 10,
+        maxlen: 120,
+        noarg: true,
+        noempty: true,
+        nonbsp: true,
+        node: true,
+        nonew: true,
+        undef: true,
+        unused: true,
+        strict: false,
+        trailing: true
+      },
+      files: ['src/*.js', 'src/store/*.js']
+    },
+    mocha_istanbul: {
+      coverage: {
+        src: 'test',
+        options: {
+          mask: '*.js',
+          reporter: 'spec'
+        }
+      },
+      coveralls: {
+        src: 'test',
+        options: {
+          coverage: true,
+          mask: '*.js',
+          reporter: 'spec'
+        }
+      }
+    },
+    strip_code: {
+      production: {
+        options: {
+          start_comment: 'test-code',
+          end_comment: 'end-test-code',
+        },
+        src: '.src_production/*.js'
+      }
+    },
+    uglify: {
+      production: {
+        files: {
+          'cc-wallet-engine.min.js': 'cc-wallet-engine.js'
+        }
+      }
+    },
+    watch: {
+      configFiles: {
+        files: ['Gruntfile.js'],
+        options: {
+          reload: true
+        }
+      },
+      src: {
+        files: ['src/**.js', 'test/*.js'],
+        tasks: ['jshint', 'coverage']
+      }
+    }
+  })
+
+  grunt.event.on('coverage', function (lcov, done) {
+    require('coveralls').handleInput(lcov, function(error) {
+      if (error && !(error instanceof Error))
+        error = new Error(error)
+
+      done(error)
+    })
+  })
+
+  grunt.loadNpmTasks('grunt-browserify')
+  grunt.loadNpmTasks('grunt-contrib-clean')
+  grunt.loadNpmTasks('grunt-contrib-copy')
+  grunt.loadNpmTasks('grunt-contrib-jshint')
+  grunt.loadNpmTasks('grunt-contrib-uglify')
+  grunt.loadNpmTasks('grunt-contrib-watch')
+  grunt.loadNpmTasks('grunt-mocha-istanbul')
+  grunt.loadNpmTasks('grunt-strip-code')
+
+  grunt.registerTask('compile', [
+    'copy:production',
+    'strip_code:production',
+    'browserify:production',
+    'uglify:production',
+    'clean:production'
+  ])
+  grunt.registerTask('compile_test', ['browserify:test'])
+  grunt.registerTask('coverage', ['mocha_istanbul:coverage'])
+  grunt.registerTask('coveralls', ['mocha_istanbul:coveralls'])
+}
