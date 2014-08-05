@@ -103,12 +103,21 @@ AddressManager.prototype.getMasterKey = function() {
 
 /**
  * Get first address if exists else create and return it
+ *
+ * @param {Object} params
+ * @param {number} params.account
+ * @param {number} params.chain
+ * @return {Address}
  */
-AddressManager.prototype.getSomeAddress = function() {
-  var addresses = this.getAllAddresses()
+AddressManager.prototype.getSomeAddress = function(params) {
+  assert(_.isObject(params), 'Expected Object params, got ' + params)
+  assert(_.isNumber(params.account), 'Expected number params.account, got ' + params.account)
+  assert(_.isNumber(params.chain), 'Expected number params.chain, got ' + params.chain)
+
+  var addresses = this.getAllAddresses(params)
 
   if (addresses.length === 0)
-    addresses = [AddressManager.prototype.getNewAddress()]
+    addresses = [this.getNewAddress(params)]
 
   return addresses[0]
 }
@@ -116,21 +125,28 @@ AddressManager.prototype.getSomeAddress = function() {
 /**
  * Get new address and save it to db
  *
+ * @param {Object} params
+ * @param {number} params.account
+ * @param {number} params.chain
  * @return {Address}
  */
-AddressManager.prototype.getNewAddress = function() {
+AddressManager.prototype.getNewAddress = function(params) {
+  assert(_.isObject(params), 'Expected Object params, got ' + params)
+  assert(_.isNumber(params.account), 'Expected number params.account, got ' + params.account)
+  assert(_.isNumber(params.chain), 'Expected number params.chain, got ' + params.chain)
+
   var masterKey = this.getMasterKey()
   if (_.isUndefined(masterKey))
     throw new Error('set masterKey first')
 
-  var maxIndex = this.amStore.getMaxIndex({ account: this.account, chain: this.chain })
+  var maxIndex = this.amStore.getMaxIndex({ account: params.account, chain: params.chain })
   var newIndex = _.isUndefined(maxIndex) ? 0 : maxIndex + 1
 
-  var newNode = derive(HDNode.fromBase58(masterKey), this.account, this.chain, newIndex)
+  var newNode = derive(HDNode.fromBase58(masterKey), params.account, params.chain, newIndex)
 
   this.amStore.addPubKey({
-    account: this.account,
-    chain: this.chain,
+    account: params.account,
+    chain: params.chain,
     index: newIndex,
     pubKey: newNode.pubKey.toHex()
   })
@@ -146,9 +162,16 @@ AddressManager.prototype.getNewAddress = function() {
 /**
  * Get all addresses
  *
+ * @param {Object} params
+ * @param {number} params.account
+ * @param {number} params.chain
  * @return {Array}
  */
-AddressManager.prototype.getAllAddresses = function() {
+AddressManager.prototype.getAllAddresses = function(params) {
+  assert(_.isObject(params), 'Expected Object params, got ' + params)
+  assert(_.isNumber(params.account), 'Expected number params.account, got ' + params.account)
+  assert(_.isNumber(params.chain), 'Expected number params.chain, got ' + params.chain)
+
   var masterKey = this.getMasterKey()
   if (_.isUndefined(masterKey))
     throw new Error('set masterKey first')
@@ -159,7 +182,7 @@ AddressManager.prototype.getAllAddresses = function() {
     return new Address({ pubKey: ECPubKey.fromHex(record.pubKey), network: network })
   }
 
-  return this.amStore.getAllPubKeys({ account: this.account, chain: this.chain }).map(record2address)
+  return this.amStore.getAllPubKeys({ account: params.account, chain: params.chain }).map(record2address)
 }
 
 

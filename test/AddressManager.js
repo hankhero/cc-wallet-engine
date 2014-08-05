@@ -38,6 +38,29 @@ describe('AddressManager', function() {
     })
   })
 
+  describe('getSomeAddress', function() {
+    beforeEach(function() {
+      am.setMasterKey(masterKeyBase58)
+    })
+
+    it('masterKey is undefined', function() {
+      am.getMasterKey = function() { return undefined }
+      var fn = function() { am.getSomeAddress({ account: 0, chain: 0 }) }
+      expect(fn).to.throw(Error)
+    })
+
+    it('return new address', function() {
+      var address = am.getSomeAddress({ account: 0, chain: 0 })
+      expect(address.getAddress()).to.equal(address0)
+    })
+
+    it('return exist address', function() {
+      var newAddress = am.getNewAddress({ account: 0, chain: 0 })
+      var address = am.getSomeAddress({ account: 0, chain: 0 })
+      expect(address.getAddress()).to.equal(newAddress.getAddress())
+    })
+  })
+
   describe('getNewAddress', function() {
     beforeEach(function() {
       am.setMasterKey(masterKeyBase58)
@@ -45,21 +68,21 @@ describe('AddressManager', function() {
 
     it('masterKey is undefined', function() {
       am.getMasterKey = function() { return undefined }
-      var fn = function() { am.getNewAddress() }
+      var fn = function() { am.getNewAddress({ account: 0, chain: 0 }) }
       expect(fn).to.throw(Error)
     })
 
     it('addPubKey throw error', function() {
-      am.getNewAddress()
-      var pubKeyHex = am.getNewAddress().pubKey.toHex()
+      am.getNewAddress({ account: 0, chain: 0 })
+      var pubKeyHex = am.getNewAddress({ account: 0, chain: 0 }).pubKey.toHex()
       am.amStore.store.set(am.amStore.pubKeysDBKey, []) // not good
       am.amStore.addPubKey({ account: 0, chain: 0, index: 0, pubKey: pubKeyHex })
-      var fn = function() { am.getNewAddress() }
+      var fn = function() { am.getNewAddress({ account: 0, chain: 0 }) }
       expect(fn).to.throw(Error)
     })
 
     it('getNewAddress once', function() {
-      var newAddress = am.getNewAddress()
+      var newAddress = am.getNewAddress({ account: 0, chain: 0 })
       expect(newAddress.getAddress()).to.equal(address0)
     })
   })
@@ -71,13 +94,13 @@ describe('AddressManager', function() {
 
     it('masterKey is undefined', function() {
       am.getMasterKey = function() { return undefined }
-      var fn = function() { am.getAllAddresses() }
+      var fn = function() { am.getAllAddresses({ account: 0, chain: 0 }) }
       expect(fn).to.throw(Error)
     })
 
     it('getAllAddresses once', function() {
-      var address0 = am.getNewAddress().getAddress()
-      var addresses = am.getAllAddresses().map(function(address) { return address.getAddress() })
+      var address0 = am.getNewAddress({ account: 0, chain: 0 }).getAddress()
+      var addresses = am.getAllAddresses({ account: 0, chain: 0 }).map(function(address) { return address.getAddress() })
       expect(addresses).to.deep.equal([address0])
     })
   })
