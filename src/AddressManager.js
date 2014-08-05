@@ -102,6 +102,18 @@ AddressManager.prototype.getMasterKey = function() {
 }
 
 /**
+ * Get first address if exists else create and return it
+ */
+AddressManager.prototype.getSomeAddress = function() {
+  var addresses = this.getAllAddresses()
+
+  if (addresses.length === 0)
+    addresses = [AddressManager.prototype.getNewAddress()]
+
+  return addresses[0]
+}
+
+/**
  * Get new address and save it to db
  *
  * @return {Address}

@@ -3,5 +3,6 @@ module.exports = {
   DataStore: require('./DataStore'),
   /* end-test-code */
 
-  AddressStore: require('./AddressStore')
+  AddressStore: require('./AddressStore'),
+  ConfigStore: require('./ConfigStore')
 }
