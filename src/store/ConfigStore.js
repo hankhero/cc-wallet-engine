@@ -13,10 +13,7 @@ var DataStore = require('./DataStore')
 function ConfigStore() {
   DataStore.apply(this, Array.prototype.slice.call(arguments))
 
-  this.configDBKey = DataStore.globalPrefix + 'config'
-  /* test-code */
-  this.configDBKey = this.configDBKey + '_tests'
-  /* end-test-code */
+  this.configDBKey = this.globalPrefix + 'config'
 
   if (!_.isObject(this.store.get(this.configDBKey)))
     this.store.set(this.configDBKey, {})

@@ -1,18 +1,23 @@
-global.localStorage = require('localStorage')
-var store = require('store')
+var assert = require('assert')
+var inherits = require('util').inherits
 
+var _ = require('lodash')
+var coloredcoinlib = require('coloredcoinjs-lib')
+var CCDataStore = coloredcoinlib.store.DataStore
 
-/**
+/*
  * @class DataStore
+ *
+ * Inherits coloredcoinjs-lib.store.DataStore
  */
-function DataStore() {
-  if (store.disabled)
-    throw new Error('localStorage is not supported!')
+function DataStore(opts) {
+  opts = _.isUndefined(opts) ? {} : opts
+  opts.globalPrefix = _.isUndefined(opts.globalPrefix) ? 'cc_wallet_' : opts.globalPrefix
 
-  this.store = store
+  CCDataStore.call(this, opts)
 }
 
-DataStore.globalPrefix = 'cc_wallet_'
+inherits(DataStore, CCDataStore)
 
 
 module.exports = DataStore

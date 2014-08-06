@@ -2,9 +2,10 @@ var expect = require('chai').expect
 
 var bitcoin = require('bitcoinjs-lib')
 var ECPubKey = bitcoin.ECPubKey
+var coloredcoinlib = require('coloredcoinjs-lib')
 
-var ccWalletEngine = require('../src/index')
-var store = ccWalletEngine.store
+var store = require('../src/store')
+var DataStore = require('../src/store/DataStore')
 
 
 describe('store', function() {
@@ -17,9 +18,10 @@ describe('store', function() {
   describe('DataStore', function() {
     var ds
 
-    it('constructor', function() {
-      ds = new store.DataStore()
-      expect(ds).to.be.instanceof(store.DataStore)
+    it('inherits coloredcoinlib.store.DataStore', function() {
+      ds = new DataStore()
+      expect(ds).to.be.instanceof(DataStore)
+      expect(ds).to.be.instanceof(coloredcoinlib.store.DataStore)
       expect(ds.store).not.to.be.undefined
     })
   })
@@ -39,7 +41,7 @@ describe('store', function() {
     })
 
     it('inherits DataStore', function() {
-      expect(aStore).to.be.instanceof(store.DataStore)
+      expect(aStore).to.be.instanceof(DataStore)
       expect(aStore).to.be.instanceof(store.AddressStore)
     })
 
@@ -102,7 +104,7 @@ describe('store', function() {
     })
 
     it('inherits DataStore', function() {
-      expect(cStore).to.be.instanceof(store.DataStore)
+      expect(cStore).to.be.instanceof(DataStore)
       expect(cStore).to.be.instanceof(store.ConfigStore)
     })
 

@@ -24,12 +24,8 @@ function isHexString(s) {
 function AddressStore() {
   DataStore.apply(this, Array.prototype.slice.call(arguments))
 
-  this.masterKeyDBKey = DataStore.globalPrefix + 'masterKey'
-  this.pubKeysDBKey = DataStore.globalPrefix + 'pubKeys'
-  /* test-code */
-  this.masterKeyDBKey = this.masterKeyDBKey + '_tests'
-  this.pubKeysDBKey = this.masterKeyDBKey + '_tests'
-  /* end-test-code */
+  this.masterKeyDBKey = this.globalPrefix + 'masterKey'
+  this.pubKeysDBKey = this.globalPrefix + 'pubKeys'
 
   if (!_.isString(this.store.get(this.masterKeyDBKey))) {
     this.store.remove(this.masterKeyDBKey)

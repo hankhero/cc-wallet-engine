@@ -4,8 +4,7 @@ var bitcoin = require('bitcoinjs-lib')
 var ECPubKey = bitcoin.ECPubKey
 var networks = bitcoin.networks
 
-var ccWalletEngine = require('../src/index')
-var Address = ccWalletEngine.Address
+var Address = require('../src/Address')
 
 
 describe('Address', function() {

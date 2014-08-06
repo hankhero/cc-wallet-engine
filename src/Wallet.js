@@ -17,16 +17,16 @@ var EPOBC_CHAIN = 826130763
 /**
  * @class Wallet
  *
- * @param {Object} params
- * @param {Buffer|string} params.masterKey Seed for hierarchical deterministic wallet
- * @param {boolean} [params.testnet=false]
+ * @param {Object} data
+ * @param {Buffer|string} data.masterKey Seed for hierarchical deterministic wallet
+ * @param {boolean} [data.testnet=false]
  */
-function Wallet(params) {
-  assert(_.isObject(params), 'Expected Object params, got ' + params)
-  assert(Buffer.isBuffer(params.masterKey) || _.isString(params.masterKey),
-    'Expected Buffer|string params.masterKey, got ' + params.masterKey)
-  params.testnet = _.isUndefined(params.testnet) ? false : params.testnet
-  assert(_.isBoolean(params.testnet), 'Expected boolean params.testnet, got ' + params.testnet)
+function Wallet(data) {
+  assert(_.isObject(data), 'Expected Object data, got ' + data)
+  assert(Buffer.isBuffer(data.masterKey) || _.isString(data.masterKey),
+    'Expected Buffer|string data.masterKey, got ' + data.masterKey)
+  data.testnet = _.isUndefined(data.testnet) ? false : data.testnet
+  assert(_.isBoolean(data.testnet), 'Expected boolean data.testnet, got ' + data.testnet)
 
 
   events.EventEmitter.call(this)
@@ -35,10 +35,10 @@ function Wallet(params) {
 
   this.aStore = new store.AddressStore()
   this.aManager = new AddressManager(this.aStore)
-  var network = params.testnet ? bitcoin.networks.testnet : bitcoin.networks.bitcoin
-  this.aManager.setMasterKeyFromSeed(params.masterKey, network)
+  var network = data.testnet ? bitcoin.networks.testnet : bitcoin.networks.bitcoin
+  this.aManager.setMasterKeyFromSeed(data.masterKey, network)
 
-  this.blockchain = new cclib.blockchain.BlockrIOAPI({ testnet: params.testnet })
+  this.blockchain = new cclib.blockchain.BlockrIOAPI({ testnet: data.testnet })
 
   this.cDataStore = new cclib.store.ColorDataStore()
   this.cData = new cclib.ColorData({ cdStore: this.cDataStore, blockchain: this.blockchain })
@@ -185,6 +185,17 @@ Wallet.prototype.updateAssetModels = function() {
     })
   })
 }
+
+/**
+ * Drop all data from storage's
+ */
+Wallet.prototype.clearStorage = function() {
+  this.config.clear()
+  this.aStore.clear()
+  this.cDataStore.clear()
+  this.cDefinitionStore.clear()
+}
+
 
 
 module.exports = Wallet

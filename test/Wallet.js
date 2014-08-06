@@ -3,8 +3,7 @@ var expect = require('chai').expect
 var _ = require('lodash')
 var cclib = require('coloredcoinjs-lib')
 
-var ccWalletEngine = require('../src/index')
-var Wallet = ccWalletEngine.Wallet
+var Wallet = require('../src/index')
 
 
 describe('Wallet', function() {
@@ -13,6 +12,10 @@ describe('Wallet', function() {
 
   beforeEach(function() {
     wallet = new Wallet({ masterKey: masterKey, testnet: true })
+  })
+
+  afterEach(function() {
+    wallet.clearStorage()
   })
 
   it('constructor', function() {})

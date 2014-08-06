@@ -3,9 +3,8 @@ var expect = require('chai').expect
 var bitcoin = require('bitcoinjs-lib')
 var networks = bitcoin.networks
 
-var ccWalletEngine = require('../src/index')
-var AddressManager = ccWalletEngine.AddressManager
-var AddressStore = ccWalletEngine.store.AddressStore
+var AddressManager = require('../src/AddressManager')
+var store = require('../src/store')
 
 
 describe('AddressManager', function() {
@@ -16,7 +15,7 @@ describe('AddressManager', function() {
   var address0 = '18KMigSHDPVFzsgWe1mcaPPA5wSY3Ur5wS'
 
   beforeEach(function() {
-    amStore = new AddressStore()
+    amStore = new store.AddressStore()
     am = new AddressManager(amStore)
   })
 

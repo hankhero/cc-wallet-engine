@@ -3,11 +3,11 @@ module.exports = function(grunt) {
     pkg: grunt.file.readJSON('package.json'),
     browserify: {
       production: {
-        src: ['.src_production/index.js'],
+        src: ['src/index.js'],
         dest: 'cc-wallet-engine.js',
         options: {
           bundleOptions: {
-            standalone: 'ccWalletEngine'
+            standalone: 'ccWallet'
           }
         }
       },
@@ -19,17 +19,6 @@ module.exports = function(grunt) {
     clean: {
       builds: {
         src: ['cc-wallet-engine.js', 'cc-wallet-engine.min.js', 'cc-wallet-engine.test.js']
-      },
-      production: {
-        src: ['.src_production']
-      }
-    },
-    copy: {
-      production: {
-        expand: true,
-        cwd: 'src',
-        src: '**',
-        dest: '.src_production'
       }
     },
     jshint: {
@@ -71,15 +60,6 @@ module.exports = function(grunt) {
         }
       }
     },
-    strip_code: {
-      production: {
-        options: {
-          start_comment: 'test-code',
-          end_comment: 'end-test-code',
-        },
-        src: '.src_production/*.js'
-      }
-    },
     uglify: {
       production: {
         files: {
@@ -112,20 +92,12 @@ module.exports = function(grunt) {
 
   grunt.loadNpmTasks('grunt-browserify')
   grunt.loadNpmTasks('grunt-contrib-clean')
-  grunt.loadNpmTasks('grunt-contrib-copy')
   grunt.loadNpmTasks('grunt-contrib-jshint')
   grunt.loadNpmTasks('grunt-contrib-uglify')
   grunt.loadNpmTasks('grunt-contrib-watch')
   grunt.loadNpmTasks('grunt-mocha-istanbul')
-  grunt.loadNpmTasks('grunt-strip-code')
 
-  grunt.registerTask('compile', [
-    'copy:production',
-    'strip_code:production',
-    'browserify:production',
-    'uglify:production',
-    'clean:production'
-  ])
+  grunt.registerTask('compile', ['browserify:production', 'uglify:production'])
   grunt.registerTask('compile_test', ['browserify:test'])
   grunt.registerTask('coverage', ['mocha_istanbul:coverage'])
   grunt.registerTask('coveralls', ['mocha_istanbul:coveralls'])
