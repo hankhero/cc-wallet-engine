@@ -7,11 +7,9 @@ var cclib = require('coloredcoinjs-lib')
 var bitcoin = require('bitcoinjs-lib')
 
 var AddressManager = require('./AddressManager')
-var AssetModel = require('./AssetModel')
+var AssetDefinitionManager = require('./asset').AssetDefinitionManager
+var AssetModel = require('./asset').AssetModel
 var store = require('./store')
-
-var UNCOLORED_CHAIN = 0
-var EPOBC_CHAIN = 826130763
 
 
 /**
@@ -43,27 +41,22 @@ function Wallet(data) {
   this.cDataStore = new cclib.store.ColorDataStore()
   this.cData = new cclib.ColorData({ cdStore: this.cDataStore, blockchain: this.blockchain })
 
-  this.cDefinitionStore = new cclib.store.ColorDefinitionStore()
-  this.cDefinitionManager = new cclib.ColorDefinitionManager(this.cDefinitionStore)
+  this.cdStore = new cclib.store.ColorDefinitionStore()
+  this.cdManager = new cclib.ColorDefinitionManager(this.cdStore)
 
-  this.assetModels = {}
-  // add uncolored
-  var uncolored = this.cDefinitionManager.getUncolored()
-  this.assetModels[uncolored.getColorId()] = new AssetModel({
-    asset: 'Bitcoin',
-    address: this.aManager.getSomeAddress({ account: 0, chain: UNCOLORED_CHAIN })
+  this.adStore = new store.AssetDefinitionStore()
+  this.adManager = new AssetDefinitionManager({
+    assetDefinitionStore: this.adStore,
+    colorDefinitionManager: this.cdManager
   })
-  // add other assets
-  // Todo: add asset storage
-  this.cDefinitionManager.getAllColorDefinitions().forEach(function(colorDefinition) {
-    var address
-    if (colorDefinition.getScheme().indexOf('epobc') === 0)
-      address = this.aManager.getSomeAddress({ account: 0, chain: EPOBC_CHAIN })
 
-    this.assetModels[colorDefinition.getColorId()] = new AssetModel({
-      asset: 'colorId: #' + colorDefinition.getColorId(),
-      address: address
-    })
+
+  this.assetModels = []
+  this.adManager.getAllAssets().forEach(function(assdef) {
+    this.assetModels.push(new AssetModel({
+      moniker: assdef.getMonikers()[0],
+      address: this.aManager.getSomeAddress({ account: 0, chain: 0 })
+    }))
   }.bind(this))
 
   this.updateAssetModels()
@@ -78,16 +71,38 @@ inherits(Wallet, events.EventEmitter)
  */
 Wallet.prototype.getCoinQuery = function() {
   var addresses = []
-  addresses = addresses.concat(this.aManager.getAllAddresses({ account: 0, chain: UNCOLORED_CHAIN }))
-  addresses = addresses.concat(this.aManager.getAllAddresses({ account: 0, chain: EPOBC_CHAIN }))
+  addresses = addresses.concat(this.aManager.getAllAddresses({ account: 0, chain: this.aManager.UNCOLORED_CHAIN }))
+  addresses = addresses.concat(this.aManager.getAllAddresses({ account: 0, chain: this.aManager.EPOBC_CHAIN }))
   addresses = addresses.map(function(address) { return address.getAddress() })
 
   return new cclib.CoinQuery({
     addresses: addresses,
     blockchain: this.blockchain,
     colorData: this.cData,
-    colorDefinitionManager: this.cDefinitionManager
+    colorDefinitionManager: this.cdManager
   })
+}
+
+/**
+ * @param {Object} data
+ * @param {Array} data.monikers
+ * @param {Array} data.colorSet
+ * @param {number} [data.unit=1]
+ * @return {Error|null}
+ */
+Wallet.prototype.addAssetDefinition = function(data) {
+  // data asserts in adManager.createAssetDefinition
+  var assdef = this.adManager.createAssetDefinition(data)
+  if (assdef instanceof Error)
+    return assdef
+
+  this.assetModels.push(new AssetModel({
+    moniker: assdef.getMonikers()[0],
+    address: this.aManager.getSomeAddress({ account: 0, chain: 0 })
+  }))
+  this.updateAssetModels()
+
+  return null
 }
 
 /**
@@ -108,9 +123,14 @@ Wallet.prototype.getAssetModels = function() {
 Wallet.prototype.updateAssetModels = function() {
   var _this = this
 
-  Object.keys(this.assetModels).map(function(colorId) {
-    var colorDefinition = _this.cDefinitionManager.getByColorId({ colorId: parseInt(colorId) })
-    var coinQuery = _this.getCoinQuery().onlyColoredAs(colorDefinition)
+  this.assetModels.forEach(function(assetModel, index) {
+    var assdef = _this.adManager.getByMoniker(assetModel.getMoniker())
+    var colorIds = assdef.getColorSet().getColorIds()
+    var colorDefinitions = colorIds.map(function(colorId) {
+      return _this.cdManager.getByColorId({ colorId: colorId })
+    })
+    var coinQuery = _this.getCoinQuery().onlyColoredAs(colorDefinitions)
+
 
     coinQuery.getCoins(function(error, coinList) {
       if (error !== null) {
@@ -127,10 +147,10 @@ Wallet.prototype.updateAssetModels = function() {
         if (colorValues.length === 0)
           return
 
-        var oldValue = _this.assetModels[colorId].props.totalBalance
+        var oldValue = _this.assetModels[index].props.totalBalance
         var newValue = colorValues[0].getValue()
         if (oldValue !== newValue) {
-          _this.assetModels[colorId].props.totalBalance = newValue
+          _this.assetModels[index].props.totalBalance = newValue
           _this.emit('assetModelsUpdated')
         }
       })
@@ -151,10 +171,10 @@ Wallet.prototype.updateAssetModels = function() {
         if (colorValues.length === 0)
           return
 
-        var oldValue = _this.assetModels[colorId].props.unconfirmedBalance
+        var oldValue = _this.assetModels[index].props.unconfirmedBalance
         var newValue = colorValues[0].getValue()
         if (oldValue !== newValue) {
-          _this.assetModels[colorId].props.unconfirmedBalance = newValue
+          _this.assetModels[index].props.unconfirmedBalance = newValue
           _this.emit('assetModelsUpdated')
         }
       })
@@ -175,10 +195,10 @@ Wallet.prototype.updateAssetModels = function() {
         if (colorValues.length === 0)
           return
 
-        var oldValue = _this.assetModels[colorId].props.availableBalance
+        var oldValue = _this.assetModels[index].props.availableBalance
         var newValue = colorValues[0].getValue()
         if (oldValue !== newValue) {
-          _this.assetModels[colorId].props.availableBalance = newValue
+          _this.assetModels[index].props.availableBalance = newValue
           _this.emit('assetModelsUpdated')
         }
       })
@@ -193,7 +213,8 @@ Wallet.prototype.clearStorage = function() {
   this.config.clear()
   this.aStore.clear()
   this.cDataStore.clear()
-  this.cDefinitionStore.clear()
+  this.cdStore.clear()
+  this.adStore.clear()
 }
 
 

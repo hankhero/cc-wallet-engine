@@ -57,8 +57,9 @@ function AddressManager(amStore) {
   assert(amStore instanceof store.AddressStore, 'Expected AddressStore amStore, got ' + amStore)
 
   this.amStore = amStore
-  this.account = 0
-  this.chain = 0
+
+  this.UNCOLORED_CHAIN = 0
+  this.EPOBC_CHAIN = 826130763
 }
 
 /**

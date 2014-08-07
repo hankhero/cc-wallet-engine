@@ -16,6 +16,7 @@
   },
   "dependencies": {
     "bitcoinjs-lib": "1.0.2",
+    "bs58": "1.2.1",
     "coloredcoinjs-lib": "git://github.com/fanatid/coloredcoinjs-lib.git",
     "lodash": "2.4.1"
   },

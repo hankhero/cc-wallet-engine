@@ -92,6 +92,61 @@ describe('store', function() {
     })
   })
 
+  describe('AssetDefinitionStore', function() {
+    var adStore
+
+    beforeEach(function() {
+      adStore = new store.AssetDefinitionStore()
+      adStore.add({
+        ids: ['111', '123'],
+        monikers: ['gold'],
+        colorSet: ['scheme1', 'scheme2'],
+        unit: 10
+      })
+    })
+
+    afterEach(function() {
+      adStore.clear()
+    })
+
+    it('add return error, id already exist', function() {
+      var result = adStore.add({
+        ids: ['113', '123'],
+        monikers: ['silver'],
+        colorSet: [''],
+        unit: 1
+      })
+      expect(result).to.be.instanceof(Error)
+    })
+
+    it('add return error, moniker already exist', function() {
+      var result = adStore.add({
+        ids: ['113'],
+        monikers: ['gold'],
+        colorSet: [''],
+        unit: 1
+      })
+      expect(result).to.be.instanceof(Error)
+    })
+
+    it('getByMoniker return null', function() {
+      var result = adStore.getByMoniker('bitcoin')
+      expect(result).to.be.null
+    })
+
+    it('getByMoniker return object', function() {
+      var result = adStore.getByMoniker('gold')
+      expect(result).to.be.instanceof(Object)
+    })
+
+    it('getAll', function() {
+      var result = adStore.getAll()
+      expect(result).to.have.length(1)
+      expect(result[0]).to.be.instanceof(Object)
+    })
+
+  })
+
   describe('ConfigStore', function() {
     var cStore
 

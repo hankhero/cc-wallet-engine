@@ -1,6 +1,14 @@
+var _ = require('lodash')
 
 
 function AssetModel(props) {
+  if (_.isUndefined(props.totalBalance))
+    props.totalBalance = 0
+  if (_.isUndefined(props.unconfirmedBalance))
+    props.unconfirmedBalance = 0
+  if (_.isUndefined(props.availableBalance))
+    props.availableBalance = 0
+
   this.props = props
 }
 
