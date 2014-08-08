@@ -1,5 +1,4 @@
 var assert = require('assert')
-var events = require('events')
 var inherits = require('util').inherits
 
 var _ = require('lodash')
@@ -9,7 +8,6 @@ var bitcoin = require('bitcoinjs-lib')
 var AddressManager = require('./AddressManager')
 var AssetDefinition = require('./asset/AssetDefinition')
 var AssetDefinitionManager = require('./asset/AssetDefinitionManager')
-var AssetModel = require('./asset/AssetModel')
 var store = require('./store')
 
 
@@ -27,8 +25,6 @@ function Wallet(data) {
   data.testnet = _.isUndefined(data.testnet) ? false : data.testnet
   assert(_.isBoolean(data.testnet), 'Expected boolean data.testnet, got ' + data.testnet)
 
-
-  events.EventEmitter.call(this)
 
   this.config = new store.ConfigStore()
 
@@ -51,21 +47,10 @@ function Wallet(data) {
     colorDefinitionManager: this.cdManager
   })
 
-
-  // Todo: remove next lines?
-  this.assetModels = []
   this.adManager.getAllAssets().forEach(function(assdef) {
-    this.assetModels.push(new AssetModel({
-      moniker: assdef.getMonikers()[0],
-      address: this.getSomeAddress(assdef)
-    }))
+    this.getSomeAddress(assdef)
   }.bind(this))
-
-  this.updateAssetModels()
 }
-
-// Todo: remove next line?
-inherits(Wallet, events.EventEmitter)
 
 /**
  * @param {Object} data
@@ -77,13 +62,8 @@ inherits(Wallet, events.EventEmitter)
 Wallet.prototype.addAssetDefinition = function(data) {
   var assdef = this.adManager.createAssetDefinition(data)
 
-  if (!(assdef instanceof Error)) {
-    this.assetModels.push(new AssetModel({
-      moniker: assdef.getMonikers()[0],
-      address: this.getSomeAddress(assdef)
-    }))
-    //this.updateAssetModels()
-  }
+  if (!(assdef instanceof Error))
+    this.getSomeAddress(assdef)
 
   return assdef
 }
@@ -275,109 +255,6 @@ Wallet.prototype.clearStorage = function() {
   this.cDataStore.clear()
   this.cdStore.clear()
   this.adStore.clear()
-}
-
-// Todo: remove next methods?
-
-/**
- * @return {Array}
- */
-Wallet.prototype.getAssetModels = function() {
-  var _this = this
-
-  var assetModels = Object.keys(this.assetModels).map(function(key) {
-    return _this.assetModels[key]
-  })
-
-  return assetModels
-}
-
-/**
- */
-Wallet.prototype.updateAssetModels = function() {
-  var _this = this
-
-  this.assetModels.forEach(function(assetModel, index) {
-    var assdef = _this.getAssetDefinitionByMoniker(assetModel.getMoniker())
-    var colorIds = assdef.getColorSet().getColorIds()
-    var colorDefinitions = colorIds.map(function(colorId) {
-      return _this.cdManager.getByColorId({ colorId: colorId })
-    })
-    var coinQuery = _this._getCoinQuery().onlyColoredAs(colorDefinitions)
-
-
-    coinQuery.getCoins(function(error, coinList) {
-      if (error !== null) {
-        _this.emit('error', error)
-        return
-      }
-
-      coinList.getTotalValue(function(error, colorValues) {
-        if (error !== null) {
-          _this.emit('error', error)
-          return
-        }
-
-        if (colorValues.length === 0)
-          return
-
-        var oldValue = _this.assetModels[index].props.totalBalance
-        var newValue = colorValues[0].getValue()
-        if (oldValue !== newValue) {
-          _this.assetModels[index].props.totalBalance = newValue
-          _this.emit('assetModelsUpdated')
-        }
-      })
-    })
-
-    coinQuery.getUnconfirmed().getCoins(function(error, coinList) {
-      if (error !== null) {
-        _this.emit('error', error)
-        return
-      }
-
-      coinList.getTotalValue(function(error, colorValues) {
-        if (error !== null) {
-          _this.emit('error', error)
-          return
-        }
-
-        if (colorValues.length === 0)
-          return
-
-        var oldValue = _this.assetModels[index].props.unconfirmedBalance
-        var newValue = colorValues[0].getValue()
-        if (oldValue !== newValue) {
-          _this.assetModels[index].props.unconfirmedBalance = newValue
-          _this.emit('assetModelsUpdated')
-        }
-      })
-    })
-
-    coinQuery.getConfirmed().getCoins(function(error, coinList) {
-      if (error !== null) {
-        _this.emit('error', error)
-        return
-      }
-
-      coinList.getTotalValue(function(error, colorValues) {
-        if (error !== null) {
-          _this.emit('error', error)
-          return
-        }
-
-        if (colorValues.length === 0)
-          return
-
-        var oldValue = _this.assetModels[index].props.availableBalance
-        var newValue = colorValues[0].getValue()
-        if (oldValue !== newValue) {
-          _this.assetModels[index].props.availableBalance = newValue
-          _this.emit('assetModelsUpdated')
-        }
-      })
-    })
-  })
 }
 
 
