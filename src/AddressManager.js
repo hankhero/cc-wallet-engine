@@ -103,27 +103,6 @@ AddressManager.prototype.getMasterKey = function() {
 }
 
 /**
- * Get first address if exists else create and return it
- *
- * @param {Object} params
- * @param {number} params.account
- * @param {number} params.chain
- * @return {Address}
- */
-AddressManager.prototype.getSomeAddress = function(params) {
-  assert(_.isObject(params), 'Expected Object params, got ' + params)
-  assert(_.isNumber(params.account), 'Expected number params.account, got ' + params.account)
-  assert(_.isNumber(params.chain), 'Expected number params.chain, got ' + params.chain)
-
-  var addresses = this.getAllAddresses(params)
-
-  if (addresses.length === 0)
-    addresses = [this.getNewAddress(params)]
-
-  return addresses[0]
-}
-
-/**
  * Get new address and save it to db
  *
  * @param {Object} params
@@ -158,6 +137,27 @@ AddressManager.prototype.getNewAddress = function(params) {
   })
 
   return newAddress
+}
+
+/**
+ * Get first address if exists else create and return it
+ *
+ * @param {Object} params
+ * @param {number} params.account
+ * @param {number} params.chain
+ * @return {Address}
+ */
+AddressManager.prototype.getSomeAddress = function(params) {
+  assert(_.isObject(params), 'Expected Object params, got ' + params)
+  assert(_.isNumber(params.account), 'Expected number params.account, got ' + params.account)
+  assert(_.isNumber(params.chain), 'Expected number params.chain, got ' + params.chain)
+
+  var addresses = this.getAllAddresses(params)
+
+  if (addresses.length === 0)
+    addresses = [this.getNewAddress(params)]
+
+  return addresses[0]
 }
 
 /**

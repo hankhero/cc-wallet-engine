@@ -32,6 +32,20 @@ function ColorSet(params) {
 }
 
 /**
+ * @return {boolean}
+ */
+ColorSet.prototype.isUncoloredOnly = function() {
+  return this.colorSchemeSet.every(function(scheme) { return scheme === '' })
+}
+
+/**
+ * @return {boolean}
+ */
+ColorSet.prototype.isEPOBCOnly = function() {
+  return this.colorSchemeSet.every(function(scheme) { return scheme.indexOf('epobc') === 0 })
+}
+
+/**
  * @return {string}
  */
 ColorSet.prototype.getColorHash = function() {
@@ -39,6 +53,13 @@ ColorSet.prototype.getColorHash = function() {
   var json = JSON.stringify(this.colorSchemeSet.slice(0).sort()).replace(', ', ',')
   var hash = crypto.createHash('sha256').update(json).digest().slice(0, 10)
   return base58.encode(hash)
+}
+
+/**
+ * @return {Array}
+ */
+ColorSet.prototype.getColorSchemes = function() {
+  return this.colorSchemeSet
 }
 
 /**

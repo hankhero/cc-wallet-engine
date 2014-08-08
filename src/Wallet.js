@@ -7,8 +7,9 @@ var cclib = require('coloredcoinjs-lib')
 var bitcoin = require('bitcoinjs-lib')
 
 var AddressManager = require('./AddressManager')
-var AssetDefinitionManager = require('./asset').AssetDefinitionManager
-var AssetModel = require('./asset').AssetModel
+var AssetDefinition = require('./asset/AssetDefinition')
+var AssetDefinitionManager = require('./asset/AssetDefinitionManager')
+var AssetModel = require('./asset/AssetModel')
 var store = require('./store')
 
 
@@ -51,17 +52,19 @@ function Wallet(data) {
   })
 
 
+  // Todo: remove next lines?
   this.assetModels = []
   this.adManager.getAllAssets().forEach(function(assdef) {
     this.assetModels.push(new AssetModel({
       moniker: assdef.getMonikers()[0],
-      address: this.aManager.getSomeAddress({ account: 0, chain: 0 })
+      address: this.getSomeAddress(assdef)
     }))
   }.bind(this))
 
   this.updateAssetModels()
 }
 
+// Todo: remove next line?
 inherits(Wallet, events.EventEmitter)
 
 /**
@@ -91,19 +94,114 @@ Wallet.prototype.getCoinQuery = function() {
  * @return {Error|null}
  */
 Wallet.prototype.addAssetDefinition = function(data) {
-  // data asserts in adManager.createAssetDefinition
   var assdef = this.adManager.createAssetDefinition(data)
-  if (assdef instanceof Error)
-    return assdef
 
-  this.assetModels.push(new AssetModel({
-    moniker: assdef.getMonikers()[0],
-    address: this.aManager.getSomeAddress({ account: 0, chain: 0 })
-  }))
-  this.updateAssetModels()
+  if (!(assdef instanceof Error)) {
+    this.assetModels.push(new AssetModel({
+      moniker: assdef.getMonikers()[0],
+      address: this.getSomeAddress(assdef)
+    }))
+    //this.updateAssetModels()
+  }
 
-  return null
+  return assdef
 }
+
+/**
+ * @param {string} moniker
+ * @return {AssetDefinition}
+ */
+Wallet.prototype.getAssetDefinitionByMoniker = function(moniker) {
+  return this.adManager.getByMoniker(moniker)
+}
+
+/**
+ * @return {Array}
+ */
+Wallet.prototype.getAllAssetDefinitions = function() {
+  return this.adManager.getAllAssets()
+}
+
+/**
+ * Return chain number for address actions
+ *
+ * @param {AssetDefinition} assdef
+ * @return {number|Error}
+ */
+Wallet.prototype._selectChain = function(assdef) {
+  assert(assdef instanceof AssetDefinition, 'Expected AssetDefinition assdef, got ' + assdef)
+
+  var chain
+
+  if (assdef.getColorSet().isUncoloredOnly()) {
+    chain = this.aManager.UNCOLORED_CHAIN
+
+  } else if (assdef.getColorSet().isEPOBCOnly()) {
+    chain = this.aManager.EPOBC_CHAIN
+
+  } else {
+    chain = new Error('Wallet chain not defined for this AssetDefintion')
+
+  }
+
+  return chain
+}
+
+/**
+ * Create new address for given asset
+ *
+ * @param {AssetDefinition} assdef
+ * @return {string|Error}
+ */
+Wallet.prototype.getNewAddress = function(assdef) {
+  var chain = this._selectChain(assdef)
+  if (chain instanceof Error)
+    return chain
+
+  return this.aManager.getNewAddress({ account: 0, chain: chain }).getAddress()
+}
+
+/**
+ * Return first address for given asset or create if not exist
+ *
+ * @param {AssetDefinition} assdef
+ * @return {string|Error}
+ */
+Wallet.prototype.getSomeAddress = function(assdef) {
+  var chain = this._selectChain(assdef)
+  if (chain instanceof Error)
+    return chain
+
+  return this.aManager.getSomeAddress({ account: 0, chain: chain }).getAddress()
+}
+
+/**
+ * Return all addresses for given asset
+ *
+ * @param {AssetDefinition} assdef
+ * @return {string|Error}
+ */
+Wallet.prototype.getAllAddresses = function(assdef) {
+  var chain = this._selectChain(assdef)
+  if (chain instanceof Error)
+    return chain
+
+  var addresses = this.aManager.getAllAddresses({ account: 0, chain: chain })
+  return addresses.map(function(address) { return address.getAddress() })
+}
+
+/**
+ * Drop all data from storage's
+ */
+Wallet.prototype.clearStorage = function() {
+  this.config.clear()
+  this.aStore.clear()
+  this.cDataStore.clear()
+  this.cdStore.clear()
+  this.adStore.clear()
+}
+
+// Todo: remove next methods?
 
 /**
  * @return {Array}
@@ -124,7 +222,7 @@ Wallet.prototype.updateAssetModels = function() {
   var _this = this
 
   this.assetModels.forEach(function(assetModel, index) {
-    var assdef = _this.adManager.getByMoniker(assetModel.getMoniker())
+    var assdef = _this.getAssetDefinitionByMoniker(assetModel.getMoniker())
     var colorIds = assdef.getColorSet().getColorIds()
     var colorDefinitions = colorIds.map(function(colorId) {
       return _this.cdManager.getByColorId({ colorId: colorId })
@@ -205,18 +303,6 @@ Wallet.prototype.updateAssetModels = function() {
     })
   })
 }
-
-/**
- * Drop all data from storage's
- */
-Wallet.prototype.clearStorage = function() {
-  this.config.clear()
-  this.aStore.clear()
-  this.cDataStore.clear()
-  this.cdStore.clear()
-  this.adStore.clear()
-}
-
 
 
 module.exports = Wallet
