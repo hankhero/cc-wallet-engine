@@ -68,25 +68,6 @@ function Wallet(data) {
 inherits(Wallet, events.EventEmitter)
 
 /**
- * Return new CoinQuery for request confirmed/unconfirmed coins, balance ...
- *
- * @return {CoinQuery}
- */
-Wallet.prototype.getCoinQuery = function() {
-  var addresses = []
-  addresses = addresses.concat(this.aManager.getAllAddresses({ account: 0, chain: this.aManager.UNCOLORED_CHAIN }))
-  addresses = addresses.concat(this.aManager.getAllAddresses({ account: 0, chain: this.aManager.EPOBC_CHAIN }))
-  addresses = addresses.map(function(address) { return address.getAddress() })
-
-  return new cclib.CoinQuery({
-    addresses: addresses,
-    blockchain: this.blockchain,
-    colorData: this.cData,
-    colorDefinitionManager: this.cdManager
-  })
-}
-
-/**
  * @param {Object} data
  * @param {Array} data.monikers
  * @param {Array} data.colorSet
@@ -191,6 +172,101 @@ Wallet.prototype.getAllAddresses = function(assdef) {
 }
 
 /**
+ * Return new CoinQuery for request confirmed/unconfirmed coins, balance ...
+ *
+ * @return {CoinQuery}
+ */
+Wallet.prototype._getCoinQuery = function() {
+  var addresses = []
+  addresses = addresses.concat(this.aManager.getAllAddresses({ account: 0, chain: this.aManager.UNCOLORED_CHAIN }))
+  addresses = addresses.concat(this.aManager.getAllAddresses({ account: 0, chain: this.aManager.EPOBC_CHAIN }))
+  addresses = addresses.map(function(address) { return address.getAddress() })
+
+  return new cclib.CoinQuery({
+    addresses: addresses,
+    blockchain: this.blockchain,
+    colorData: this.cData,
+    colorDefinitionManager: this.cdManager
+  })
+}
+
+/**
+ * @param {AssetDefinition} assdef
+ * @param {Object} opts
+ * @param {boolean} [opts.onlyConfirmed=false]
+ * @param {boolean} [opts.onlyUnconfirmed=false]
+ * @param {function} cb
+ */
+Wallet.prototype._getBalance = function(assdef, opts, cb) {
+  assert(assdef instanceof AssetDefinition, 'Expected AssetDefinition assdef, got ' + assdef)
+  assert(_.isObject(opts), 'Expected Object opts, got ' + opts)
+  opts = _.extend({
+    onlyConfirmed: false,
+    onlyUnconfirmed: false
+  }, opts)
+  assert(_.isBoolean(opts.onlyConfirmed), 'Expected boolean opts.onlyConfirmed, got ' + opts.onlyConfirmed)
+  assert(_.isBoolean(opts.onlyUnconfirmed), 'Expected boolean opts.onlyUnconfirmed, got ' + opts.onlyUnconfirmed)
+  assert(!opts.onlyConfirmed || !opts.onlyUnconfirmed, 'opts.onlyConfirmed and opts.onlyUnconfirmed both is true')
+  assert(_.isFunction(cb), 'Expected function cb, got ' + cb)
+
+  var colors = assdef.getColorSet().getColorIds().map(function(colorId) {
+    return this.cdManager.getByColorId({ colorId: colorId })
+  }.bind(this))
+  var coinQuery = this._getCoinQuery().onlyColoredAs(colors)
+  if (opts.onlyConfirmed)
+    coinQuery = coinQuery.getConfirmed()
+  if (opts.onlyUnconfirmed)
+    coinQuery = coinQuery.getUnconfirmed()
+
+  coinQuery.getCoins(function(error, coinList) {
+    if (error !== null) {
+      cb(error)
+      return
+    }
+
+    coinList.getTotalValue(function(error, colorValues) {
+      if (error !== null) {
+        cb(error)
+        return
+      }
+
+      var balance = 0
+      if (colorValues.length === 1)
+        balance = colorValues[0].getValue()
+      // When supported more than one colorDefinition in one AssetDefinition
+      //if (colorValues.length > 1)
+      //  balance = colorValues.reduce(function(cv1, cv2) { return cv1.getValue() + cv2.getValue() })
+
+      cb(null, balance)
+    })
+  })
+}
+
+/**
+ * @param {AssetDefinition} assdef
+ * @param {function} cb
+ */
+Wallet.prototype.getAvailableBalance = function(assdef, cb) {
+  this._getBalance(assdef, { 'onlyConfirmed': true }, cb)
+}
+
+/**
+ * @param {AssetDefinition} assdef
+ * @param {function} cb
+ */
+Wallet.prototype.getTotalBalance = function(assdef, cb) {
+  this._getBalance(assdef, {}, cb)
+}
+
+/**
+ * @param {AssetDefinition} assdef
+ * @param {function} cb
+ */
+Wallet.prototype.getUnconfirmedBalance = function(assdef, cb) {
+  this._getBalance(assdef, { 'onlyUnconfirmed': true }, cb)
+}
+
+/**
  * Drop all data from storage's
  */
 Wallet.prototype.clearStorage = function() {
@@ -227,7 +303,7 @@ Wallet.prototype.updateAssetModels = function() {
     var colorDefinitions = colorIds.map(function(colorId) {
       return _this.cdManager.getByColorId({ colorId: colorId })
     })
-    var coinQuery = _this.getCoinQuery().onlyColoredAs(colorDefinitions)
+    var coinQuery = _this._getCoinQuery().onlyColoredAs(colorDefinitions)
 
 
     coinQuery.getCoins(function(error, coinList) {
