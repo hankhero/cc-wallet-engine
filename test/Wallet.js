@@ -4,6 +4,7 @@ var _ = require('lodash')
 var cclib = require('coloredcoinjs-lib')
 
 var AssetDefinition = require('../src/asset/AssetDefinition')
+var AssetModels = require('../src/asset/AssetModels')
 var Wallet = require('../src/index')
 
 
@@ -184,5 +185,9 @@ describe('Wallet', function() {
         done()
       })
     })
+  })
+
+  it('getAssetModels', function() {
+    expect(wallet.getAssetModels()).to.be.instanceof(AssetModels)
   })
 })

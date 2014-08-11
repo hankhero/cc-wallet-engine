@@ -7,6 +7,7 @@ var bitcoin = require('bitcoinjs-lib')
 var AddressManager = require('./AddressManager')
 var AssetDefinition = require('./asset/AssetDefinition')
 var AssetDefinitionManager = require('./asset/AssetDefinitionManager')
+var AssetModels = require('./asset/AssetModels')
 var store = require('./store')
 
 
@@ -243,6 +244,13 @@ Wallet.prototype.getTotalBalance = function(assdef, cb) {
  */
 Wallet.prototype.getUnconfirmedBalance = function(assdef, cb) {
   this._getBalance(assdef, { 'onlyUnconfirmed': true }, cb)
+}
+
+/**
+ *
+ */
+Wallet.prototype.getAssetModels = function() {
+  return new AssetModels(this)
 }
 
 /**

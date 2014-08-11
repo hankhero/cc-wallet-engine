@@ -6,6 +6,7 @@ var AssetDefinition =require('../src/asset/AssetDefinition')
 var AssetDefinitionManager = require('../src/asset/AssetDefinitionManager')
 var ColorSet = require('../src/asset/ColorSet')
 var store = require('../src/store')
+var Wallet = require('../src/index')
 
 
 describe('asset', function() {
@@ -145,6 +146,55 @@ describe('asset', function() {
       var asset = adManager.getByMoniker('bronze')
       expect(asset).to.be.null
     })
+  })
+
+  describe('AssetModels', function() {
+      var wallet
+      var masterKey = '123131123131123131123131123131123131123131123131123131'
+
+      beforeEach(function() {
+        wallet = new Wallet({ masterKey: masterKey, testnet: true })
+      })
+
+      afterEach(function() {
+        wallet.clearStorage()
+      })
+
+      this.timeout(5000)
+
+      it('', function(done) {
+        wallet.addAssetDefinition({
+          monikers: ['gold'],
+          colorSet: ['epobc:b95323a763fa507110a89ab857af8e949810cf1e67e91104cd64222a04ccd0bb:0:180679']
+        })
+        var assetModels = wallet.getAssetModels()
+        var waitEvents = 5
+        assetModels.on('update', function() {
+          if (--waitEvents !== 0)
+            return
+
+          function checkAssetModel(moniker, model) {
+            if (moniker === 'bitcoin') {
+              expect(model.getTotalBalance()).to.equal(67000000)
+              expect(model.getUnconfirmedBalance()).to.equal(0)
+              expect(model.getAvailableBalance()).to.equal(67000000)
+            }
+            if (moniker === 'gold') {
+              expect(model.getTotalBalance()).to.equal(2000)
+              expect(model.getUnconfirmedBalance()).to.equal(0)
+              expect(model.getAvailableBalance()).to.equal(2000)
+            }
+          }
+
+          var models = assetModels.getAssetModels()
+          expect(models).to.have.length(2)
+          checkAssetModel(models[0].getMoniker(), models[0])
+          checkAssetModel(models[1].getMoniker(), models[1])
+
+          done()
+        })
+        assetModels.update()
+      })
   })
 
   describe('ColorSet', function() {
