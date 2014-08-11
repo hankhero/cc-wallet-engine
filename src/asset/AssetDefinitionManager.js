@@ -43,7 +43,7 @@ function AssetDefinitionManager(params) {
  */
 AssetDefinitionManager.prototype.createAssetDefinition = function(data) {
   // asserts for data in AssetDefinition
-  var assdef = new AssetDefinition({ colorDefinitionManager: this.cdManager, data: data })
+  var assdef = new AssetDefinition(this.cdManager, data)
 
   var error = this.adStore.add({
     ids: assdef.getIds(),
@@ -65,7 +65,7 @@ AssetDefinitionManager.prototype.getByMoniker = function(moniker) {
   var result = this.adStore.getByMoniker(moniker)
 
   if (result !== null)
-    result = new AssetDefinition({ colorDefinitionManager: this.cdManager, data: result })
+    result = new AssetDefinition(this.cdManager, result)
 
   return result
 }
@@ -75,7 +75,7 @@ AssetDefinitionManager.prototype.getByMoniker = function(moniker) {
  */
 AssetDefinitionManager.prototype.getAllAssets = function() {
   var assdefs = this.adStore.getAll().map(function(record) {
-    return new AssetDefinition({ colorDefinitionManager: this.cdManager, data: record })
+    return new AssetDefinition(this.cdManager, record)
   }.bind(this))
 
   return assdefs

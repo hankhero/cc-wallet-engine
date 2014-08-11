@@ -97,7 +97,7 @@ AssetModels.prototype.updateAssetModels = function() {
 }
 
 
-describe('AssetModelDemo', function() {
+describe.skip('AssetModelDemo', function() {
   var wallet, assetModels
   var masterKey = '123131123131123131123131123131123131123131123131123131'
 

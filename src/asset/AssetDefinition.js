@@ -8,39 +8,51 @@ var ColorSet = require('./ColorSet')
 
 /**
  * @class AssetDefinition
- *
- * @param {Object} params
- * @param {coloredcoinjs-lib.ColorDefinitionManager} params.colorDefinitionManager
- * @param {Object} params.data
- * @param {Array} params.data.monikers
- * @param {Array} params.data.colorSet
- * @param {number} [params.data.unit=1]
+
+ * @param {coloredcoinjs-lib.ColorDefinitionManager} colorDefinitionManager
+ * @param {Object} data
+ * @param {Array} data.monikers
+ * @param {Array} data.colorSet
+ * @param {number} [data.unit=1] Power of 10 and greater than 0
  */
-function AssetDefinition(params) {
-  assert(_.isObject(params), 'Expected Object params, got ' + params)
-  assert(params.colorDefinitionManager instanceof ColorDefinitionManager,
-    'Expected ColorDefinitionManager params.colorDefinitionManager, got ' + params.colorDefinitionManager)
-  assert(_.isObject(params.data), 'Expected Object params.data, got ' + params.data)
-  assert(_.isArray(params.data.monikers), 'Expected Array params.data.monikers, got ' + params.data.monikers)
-  params.data.monikers.forEach(function(moniker) {
-    assert(_.isString(moniker), 'Expected Array strings params.data.monikers, got ' + params.data.monikers)
-  })
-  assert(_.isArray(params.data.colorSet), 'Expected Array params.data.colorSet, got ' + params.data.colorSet)
-  params.data.colorSet.forEach(function(color) {
-    assert(_.isString(color), 'Expected Array strings params.data.colorSet, got ' + params.data.colorSet)
-  })
-  params.data.unit = _.isUndefined(params.data.unit) ? 1 : params.data.unit
-  assert(_.isNumber(params.data.unit), 'Expected number params.data.unit, got ' + params.data.unit)
+function AssetDefinition(colorDefinitionManager, data) {
+  assert(colorDefinitionManager instanceof ColorDefinitionManager,
+    'Expected ColorDefinitionManager colorDefinitionManager, got ' + colorDefinitionManager)
 
-  // Todo
-  assert(params.data.colorSet.length === 1, 'Currently only single-color assets are supported')
+  assert(_.isObject(data), 'Expected Object data, got ' + data)
+  assert(_.isArray(data.monikers), 'Expected Array data.monikers, got ' + data.monikers)
+  data.monikers.forEach(function(moniker) {
+    assert(_.isString(moniker), 'Expected Array strings data.monikers, got ' + data.monikers)
+  })
+  assert(_.isArray(data.colorSet), 'Expected Array data.colorSet, got ' + data.colorSet)
+  data.colorSet.forEach(function(color) {
+    assert(_.isString(color), 'Expected Array strings data.colorSet, got ' + data.colorSet)
+  })
+  if (_.isUndefined(data.unit)) data.unit = 1
+  assert(_.isNumber(data.unit), 'Expected number data.unit, got ' + data.unit)
 
-  this.monikers = params.data.monikers
+  if (Math.log(data.unit) / Math.LN10 % 1 !== 0)
+    return new Error('data.unit must be power of 10 and greater than 0')
+
+  assert(data.colorSet.length === 1, 'Currently only single-color assets are supported')
+
+  this.monikers = data.monikers
   this.colorSet = new ColorSet({
-    colorDefinitionManager: params.colorDefinitionManager,
-    colorSchemeSet: params.data.colorSet
+    colorDefinitionManager: colorDefinitionManager,
+    colorSchemeSet: data.colorSet
   })
-  this.unit = params.data.unit
+  this.unit = data.unit
+}
+
+/**
+ * @return {Object}
+ */
+AssetDefinition.prototype.getData = function() {
+  return {
+    monikers: this.monikers,
+    colorSet: this.colorSet.getData(),
+    unit: this.unit
+  }
 }
 
 /**
@@ -72,14 +84,31 @@ AssetDefinition.prototype.getColorSet = function() {
 }
 
 /**
- * @return {Object}
+ * @param {string} portion
+ * @return {number}
  */
-AssetDefinition.prototype.getData = function() {
-  return {
-    monikers: this.monikers,
-    colorSet: this.colorSet.getData(),
-    unit: this.unit
-  }
+AssetDefinition.prototype.parseValue = function(portion) {
+  assert(_.isString(portion), 'Expected string portion, got ' + portion)
+
+  var items = portion.split('.')
+  var value = parseInt(items[0]) * this.unit + parseInt(items[1])
+
+  return value
+}
+
+/**
+ * @param {number} value
+ * @return {string}
+ */
+AssetDefinition.prototype.formatValue = function(value) {
+  assert(_.isNumber(value), 'Expected number value, got ' + value)
+
+  var centString = (value % this.unit).toString()
+  var centLength = this.unit.toString().length - 1
+  while (centString.length < centLength)
+    centString = '0' + centString
+
+  return ~~(value/this.unit) + '.' + centString
 }
 
 
