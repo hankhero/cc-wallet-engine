@@ -15,8 +15,7 @@
     "url": "https://github.com/fanatid/cc-wallet-engine"
   },
   "dependencies": {
-    "bitcoinjs-lib": "1.0.2",
-    "bs58": "1.2.1",
+    "cc-wallet-core": "git://github.com/fanatid/cc-wallet-core.git",
     "coloredcoinjs-lib": "git://github.com/fanatid/coloredcoinjs-lib.git",
     "lodash": "2.4.1"
   },
@@ -30,6 +29,7 @@
     "grunt-contrib-uglify": "0.5.1",
     "grunt-contrib-watch": "0.6.1",
     "grunt-mocha-istanbul": "1.5.0",
+    "grunt-mocha-test": "0.11.0",
     "mocha": "1.21.4"
   }
 }

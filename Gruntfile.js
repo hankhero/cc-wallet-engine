@@ -7,7 +7,7 @@ module.exports = function(grunt) {
         dest: 'cc-wallet-engine.js',
         options: {
           bundleOptions: {
-            standalone: 'ccWallet'
+            standalone: 'ccWalletEngine'
           }
         }
       },
@@ -48,7 +48,8 @@ module.exports = function(grunt) {
         src: 'test',
         options: {
           mask: '*.js',
-          reporter: 'spec'
+          reporter: 'spec',
+          timeout: 8000
         }
       },
       coveralls: {
@@ -56,7 +57,24 @@ module.exports = function(grunt) {
         options: {
           coverage: true,
           mask: '*.js',
-          reporter: 'spec'
+          reporter: 'spec',
+          timeout: 8000
+        }
+      }
+    },
+    mochaTest: {
+      test: {
+        options: {
+          reporter: 'spec',
+          timeout: 8000
+        },
+        src: ['test/*.js']
+      }
+    },
+    uglify: {
+      production: {
+        files: {
+          'cc-wallet-core.min.js': 'cc-wallet-core.js'
         }
       }
     },
@@ -96,9 +114,11 @@ module.exports = function(grunt) {
   grunt.loadNpmTasks('grunt-contrib-uglify')
   grunt.loadNpmTasks('grunt-contrib-watch')
   grunt.loadNpmTasks('grunt-mocha-istanbul')
+  grunt.loadNpmTasks('grunt-mocha-test')
 
   grunt.registerTask('compile', ['browserify:production', 'uglify:production'])
   grunt.registerTask('compile_test', ['browserify:test'])
   grunt.registerTask('coverage', ['mocha_istanbul:coverage'])
   grunt.registerTask('coveralls', ['mocha_istanbul:coveralls'])
+  grunt.registerTask('test', ['mochaTest'])
 }
