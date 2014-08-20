@@ -68,11 +68,11 @@ PaymentModel.prototype.send = function(cb) {
   var assetdef = this.assetModel.assetdef
 
   var rawTargets = this.recipients.map(function(recipient) {
-    var address = recipient.address
-    var value = assetdef.parseValue(recipient.amount)
-
-    return { address: address, value: value }
-  })
+    var address = this.assetModel.wallet.getBitcoinAddress(
+            assetdef, recipient.address);
+    var value = assetdef.parseValue(recipient.amount);
+    return { address: address, value: value };
+  }.bind(this));
 
   this.readOnly = true
   this.assetModel.wallet.sendCoins(this.assetModel.assetdef, rawTargets, cb)
