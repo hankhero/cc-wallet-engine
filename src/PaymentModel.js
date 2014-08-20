@@ -65,16 +65,16 @@ PaymentModel.prototype.send = function(cb) {
   if (this.recipients.length === 0)
     throw new Error('recipients list is empty')
 
-  this.readOnly = true
-
   var assetdef = this.assetModel.assetdef
 
   var rawTargets = this.recipients.map(function(recipient) {
-    var address = recipient.address // Todo: if color address, convert to bitcoin address
+    var address = recipient.address
     var value = assetdef.parseValue(recipient.amount)
+
     return { address: address, value: value }
   })
 
+  this.readOnly = true
   this.assetModel.wallet.sendCoins(this.assetModel.assetdef, rawTargets, cb)
 
   return this

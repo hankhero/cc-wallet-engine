@@ -85,7 +85,7 @@ AssetModel.prototype.update = function() {
     self.emit('update')
   }
 
-  var address = self.wallet.getSomeAddress(self.assetdef)
+  var address = self.wallet.getSomeAddress(self.assetdef, true)
   if (self.props.address !== address) {
     self.props.address = address
     self.emit('update')

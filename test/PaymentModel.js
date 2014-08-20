@@ -38,7 +38,7 @@ describe('PaymentModel', function() {
   })
 
   it('checkAmount return true', function() {
-    var isValid = paymentModel.checkAmount('0.01')
+    var isValid = paymentModel.checkAmount('0.001')
     expect(isValid).to.be.true
   })
 
