@@ -1,3 +1,1 @@
-module.exports = {
-  AssetModels: require('./AssetModels')
-}
+module.exports = require('./WalletEngine')
