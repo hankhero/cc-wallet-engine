@@ -13,9 +13,9 @@ WalletEngine.prototype.isInitialized = function () {
 
 WalletEngine.prototype.getAssetModels = function () {
     if (this.isInitialized()) {
-        return [];
-    } else {
         return this.assetModels.getAssetModels();
+    } else {
+        return [];        
     }
 };
 
@@ -33,14 +33,15 @@ WalletEngine.prototype.initializeFromSeed = function (seed) {
         };
     if (params == null) throw 'not implemented';
     this.wallet = new Wallet(params);
-    this.assetModels = new AssetModels(wallet);
-    this.assetModels.on('update', function () { this.updateCallback(); });
+    this.assetModels = new AssetModels(this.wallet);
+    var self = this;
+    this.assetModels.on('update', function () { self.updateCallback(); });
     this.assetModels.update();
 };
 
 
 WalletEngine.prototype.setCallback = function (callback) {
-    this.updateCallback = callbacl;
+    this.updateCallback = callback;
 };
 
 WalletEngine.prototype.generateRandomSeed = function (entropy) {
