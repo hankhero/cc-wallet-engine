@@ -1,6 +1,8 @@
 var events = require('events')
 var util = require('util')
 
+var PaymentModel = require('./PaymentModel')
+
 
 /**
  * @class AssetModel
@@ -68,7 +70,7 @@ AssetModel.prototype.getTotalBalance = function () {
  * @return {PaymentModel}
  */
 AssetModel.prototype.makePayment = function() {
-  throw new Error('not implemented')
+  return new PaymentModel(this)
 }
 
 /**
