@@ -1,57 +1,83 @@
 var AssetModels = require('./AssetModels')
 var Wallet = require('cc-wallet-core')
 
+
+/**
+ * @class WalletEngine
+ *
+ * @param {?} opts
+ */
 function WalletEngine(opts) {
-    this.wallet = null;
-    this.assetModels = null;
-    this.updateCallback = function () {};
+  this.wallet = null
+  this.assetModels = null
+  this.updateCallback = function() {}
 }
 
-WalletEngine.prototype.isInitialized = function () {
-    return this.wallet != null;
-};
+/**
+ * @return {boolean}
+ */
+WalletEngine.prototype.isInitialized = function() {
+  return this.wallet !== null
+}
 
-WalletEngine.prototype.getAssetModels = function () {
-    if (this.isInitialized()) {
-        return this.assetModels.getAssetModels();
-    } else {
-        return [];        
+/**
+ * @return {AssetModel[]}
+ */
+WalletEngine.prototype.getAssetModels = function() {
+  if (this.isInitialized())
+    return this.assetModels.getAssetModels()
+
+  return []
+}
+
+/**
+ */
+WalletEngine.prototype.update = function() {
+  if (this.assetModels instanceof AssetModels)
+    this.assetModels.update()
+}
+
+/**
+ */
+WalletEngine.prototype.initializeFromSeed = function(seed) {
+  var walletOpts = null
+  if (seed === 'test')
+    walletOpts = {
+      masterKey: '123131123131123131123131123131123131123131123131123131',
+      testnet: true
     }
-};
 
-WalletEngine.prototype.update = function () {
-    if (this.assetModels)
-        this.assetModels.update();
-};
+  if (walletOpts === null)
+    throw new Error('not implemented')
 
-WalletEngine.prototype.initializeFromSeed = function (seed) {
-    var params = null;
-    if (seed === 'test')
-        params = {
-                "masterKey": "123131123131123131123131123131123131123131123131123131", 
-                testnet: true
-        };
-    if (params == null) throw 'not implemented';
-    this.wallet = new Wallet(params);
-    this.assetModels = new AssetModels(this.wallet);
-    var self = this;
-    this.assetModels.on('update', function () { self.updateCallback(); });
-    this.assetModels.update();
-};
-
-
-WalletEngine.prototype.setCallback = function (callback) {
-    this.updateCallback = callback;
-};
-
-WalletEngine.prototype.generateRandomSeed = function (entropy) {
-    // TODO
-    return "test";
+  this.wallet = new Wallet(walletOpts)
+  this.assetModels = new AssetModels(this.wallet)
+  this.assetModels.on('update', function() { this.updateCallback() }.bind(this))
+  this.assetModels.update()
 }
 
-WalletEngine.prototype.getHistory = function () {
-    // TODO
-    return [];
+/**
+ * @param {function} callback
+ */
+WalletEngine.prototype.setCallback = function(callback) {
+  this.updateCallback = callback
 }
 
-module.exports = WalletEngine;
+/**
+ * @param {?} entropy
+ * @return {string}
+ */
+WalletEngine.prototype.generateRandomSeed = function(entropy) {
+  // TODO
+  return "test"
+}
+
+/**
+ */
+WalletEngine.prototype.getHistory = function() {
+  // TODO
+  return []
+}
+
+
+module.exports = WalletEngine
