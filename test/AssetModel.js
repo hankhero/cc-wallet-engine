@@ -5,12 +5,16 @@ var ccWallet = require('cc-wallet-core')
 var AssetModel = require('../src/AssetModel')
 
 
-describe('AssetModels', function() {
+describe('AssetModel', function() {
   var wallet, assetModel
 
-  beforeEach(function() {
+  beforeEach(function(done) {
     wallet = new ccWallet({ masterKey: '12355564466111166655222222222222', testnet: true })
     assetModel = new AssetModel(wallet, wallet.getAssetDefinitionByMoniker('bitcoin'))
+    wallet.fullScanAllAddresses(function(error) {
+      expect(error).to.be.null
+      done()
+    })
   })
 
   afterEach(function() {

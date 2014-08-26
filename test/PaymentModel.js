@@ -11,16 +11,19 @@ describe('PaymentModel', function() {
 
   beforeEach(function(done) {
     wallet = new ccWallet({ masterKey: '12355564466111166655222332222222', testnet: true })
+    wallet.fullScanAllAddresses(function(error) {
+      expect(error).to.be.null
 
-    var cnt = 0
-    assetModel = new AssetModel(wallet, wallet.getAssetDefinitionByMoniker('bitcoin'))
-    assetModel.on('update', function() {
-      if (++cnt === 5) {
-        paymentModel = assetModel.makePayment()
-        done()
-      }
+      var cnt = 0
+      assetModel = new AssetModel(wallet, wallet.getAssetDefinitionByMoniker('bitcoin'))
+      assetModel.on('update', function() {
+        if (++cnt === 5) {
+          paymentModel = assetModel.makePayment()
+          done()
+        }
+      })
+      assetModel.update()
     })
-    assetModel.update()
   })
 
   afterEach(function() {
