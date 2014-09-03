@@ -17,7 +17,8 @@
   "dependencies": {
     "cc-wallet-core": "git://github.com/fanatid/cc-wallet-core.git",
     "coloredcoinjs-lib": "git://github.com/fanatid/coloredcoinjs-lib.git",
-    "lodash": "2.4.1"
+    "lodash": "2.4.1",
+    "strftime": "0.8.2"
   },
   "devDependencies": {
     "chai": "1.9.1",

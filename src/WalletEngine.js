@@ -1,5 +1,7 @@
-var AssetModels = require('./AssetModels')
 var Wallet = require('cc-wallet-core')
+
+var AssetModels = require('./AssetModels')
+var HistoryEntries = require('./HistoryEntries')
 
 
 /**
@@ -10,6 +12,8 @@ var Wallet = require('cc-wallet-core')
 function WalletEngine(opts) {
   this.wallet = null
   this.assetModels = null
+  this.historyEntries = null
+  this.initialized = false
   this.updateCallback = function() {}
 }
 
@@ -17,24 +21,44 @@ function WalletEngine(opts) {
  * @return {boolean}
  */
 WalletEngine.prototype.isInitialized = function() {
-  return this.wallet !== null
+  return this.initialized
 }
 
 /**
  * @return {AssetModel[]}
  */
 WalletEngine.prototype.getAssetModels = function() {
-  if (this.isInitialized())
-    return this.assetModels.getAssetModels()
+  if (!this.isInitialized())
+    return []
 
-  return []
+  return this.assetModels.getAssetModels()
+}
+
+/**
+ * @return {HistoryEntryModel[]}
+ */
+WalletEngine.prototype.getHistory = function() {
+  if (this.isInitialized())
+    return []
+
+  return this.historyEntries.getEntries()
 }
 
 /**
  */
 WalletEngine.prototype.update = function() {
-  if (this.assetModels instanceof AssetModels)
-    this.assetModels.update()
+  if (!this.isInitialized())
+    return
+
+  this.assetModels.update()
+  this.historyEntries.update()
+}
+
+/**
+ * @param {function} callback
+ */
+WalletEngine.prototype.setCallback = function(callback) {
+  this.updateCallback = callback
 }
 
 /**
@@ -51,16 +75,15 @@ WalletEngine.prototype.initializeFromSeed = function(seed) {
     throw new Error('not implemented')
 
   this.wallet = new Wallet(walletOpts)
+
   this.assetModels = new AssetModels(this.wallet)
   this.assetModels.on('update', function() { this.updateCallback() }.bind(this))
   this.assetModels.update()
-}
 
-/**
- * @param {function} callback
- */
-WalletEngine.prototype.setCallback = function(callback) {
-  this.updateCallback = callback
+  this.historyEntries = new HistoryEntries(this.wallet)
+  this.historyEntries.update()
+
+  this.initialized = true
 }
 
 /**
@@ -70,13 +93,6 @@ WalletEngine.prototype.setCallback = function(callback) {
 WalletEngine.prototype.generateRandomSeed = function(entropy) {
   // TODO
   return "test"
-}
-
-/**
- */
-WalletEngine.prototype.getHistory = function() {
-  // TODO
-  return []
 }
 
 
