@@ -1,3 +1,4 @@
+var _ = require('lodash')
 var strftime = require('strftime')
 
 
@@ -30,13 +31,29 @@ HistoryEntryModel.prototype.getDate = function() {
  * @return {string[]}
  */
 HistoryEntryModel.prototype.getValues = function() {
-  var assetValues = this.historyEntry.getAssetValues()
-
-  var values = assetValues.map(function(av) {
+  var values = this.historyEntry.getValues().map(function(av) {
     return av.getAsset().formatValue(av.getValue())
   })
 
   return values
+}
+
+/**
+ * @typedef {Object} HistoryTarget
+ * @property {string} address0
+ * @property {string} address1
+ * @property {string} addressN
+ */
+
+/**
+ * @return {HistoryTarget}
+ */
+HistoryEntryModel.prototype.getTargets = function() {
+  var targets = this.historyEntry.getTargets().map(function(at) {
+    return [at.getAddress(), at.getAsset().formatValue(at.getValue())]
+  })
+
+  return _.object(targets)
 }
 
 /**
