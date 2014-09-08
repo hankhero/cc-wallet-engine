@@ -17,7 +17,7 @@ describe('PaymentModel', function() {
       var cnt = 0
       assetModel = new AssetModel(wallet, wallet.getAssetDefinitionByMoniker('bitcoin'))
       assetModel.on('update', function() {
-        if (++cnt === 5) {
+        if (++cnt === 6) {
           paymentModel = assetModel.makePayment()
           done()
         }

@@ -1,7 +1,6 @@
 var Wallet = require('cc-wallet-core')
 
 var AssetModels = require('./AssetModels')
-var HistoryEntries = require('./HistoryEntries')
 
 
 /**
@@ -12,7 +11,6 @@ var HistoryEntries = require('./HistoryEntries')
 function WalletEngine(opts) {
   this.wallet = null
   this.assetModels = null
-  this.historyEntries = null
   this.initialized = false
   this.updateCallback = function() {}
 }
@@ -35,23 +33,12 @@ WalletEngine.prototype.getAssetModels = function() {
 }
 
 /**
- * @return {HistoryEntryModel[]}
- */
-WalletEngine.prototype.getHistory = function() {
-  if (this.isInitialized())
-    return []
-
-  return this.historyEntries.getEntries()
-}
-
-/**
  */
 WalletEngine.prototype.update = function() {
   if (!this.isInitialized())
     return
 
   this.assetModels.update()
-  this.historyEntries.update()
 }
 
 /**
@@ -79,9 +66,6 @@ WalletEngine.prototype.initializeFromSeed = function(seed) {
   this.assetModels = new AssetModels(this.wallet)
   this.assetModels.on('update', function() { this.updateCallback() }.bind(this))
   this.assetModels.update()
-
-  this.historyEntries = new HistoryEntries(this.wallet)
-  this.historyEntries.update()
 
   this.initialized = true
 }

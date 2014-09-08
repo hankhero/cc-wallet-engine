@@ -3,32 +3,36 @@ var expect = require('chai').expect
 var ccWallet = require('cc-wallet-core')
 var _ = require('lodash')
 
-var HistoryEntries = require('../src/HistoryEntries')
+var AssetModels = require('../src/AssetModels')
+var AssetModel = require('../src/AssetModel')
 var HistoryEntryModel = require('../src/HistoryEntryModel')
 
 
 describe('HistoryEntryModel', function() {
-  var wallet, assetModel, historyEntry
+  var wallet, assetModels, assetModel, historyEntry
 
   beforeEach(function(done) {
     wallet = new ccWallet({ masterKey: '12355564466111166655222222222222', testnet: true })
     wallet.fullScanAllAddresses(function(error) {
       expect(error).to.be.null
 
-      historyEntries = new HistoryEntries(wallet)
-      historyEntries.on('update', function() {
-        if (_.isUndefined(done))
+      assetModels = new AssetModels(wallet)
+      var cnt = 0
+      assetModels.on('update', function() {
+        if (++cnt !== 7)
           return
 
-        var entries = historyEntries.getEntries()
-        expect(entries).to.be.instanceof(Array).with.to.have.length(1)
-        expect(entries[0]).to.be.instanceof(HistoryEntryModel)
-        historyEntry = entries[0]
+        expect(assetModels.getAssetModels()).to.have.length(1)
+        expect(assetModels.getAssetModels()[0]).to.be.instanceof(AssetModel)
+        assetModel = assetModels.getAssetModels()[0]
+
+        expect(assetModel.getHistory()).to.be.instanceof(Array).with.to.have.length(1)
+        expect(assetModel.getHistory()[0]).to.be.instanceof(HistoryEntryModel)
+        historyEntry = assetModel.getHistory()[0]
 
         done()
-        done = undefined
       })
-      historyEntries.update()
+      assetModels.update()
     })
   })
 

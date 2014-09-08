@@ -9,8 +9,9 @@ var AssetModel = require('./AssetModel')
 /**
  * @class AssetModels
  *
- * Inhertis events.EventEmitter
+ * @param {cc-wallet-core.Wallet} wallet
  *
+ * Inhertis events.EventEmitter
  * Event 'update': triggered on assetModels updated
  */
 function AssetModels(wallet) {

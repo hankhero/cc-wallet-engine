@@ -1,8 +1,7 @@
 var events = require('events')
 var util = require('util')
 
-var _ = require('lodash')
-
+var HistoryEntryModel = require('./HistoryEntryModel')
 var PaymentModel = require('./PaymentModel')
 
 
@@ -27,7 +26,8 @@ function AssetModel(wallet, assetdef) {
     address: '',
     unconfirmedBalance: '',
     availableBalance: '',
-    totalBalance: ''
+    totalBalance: '',
+    historyEntries: []
   }
 }
 
@@ -66,6 +66,13 @@ AssetModel.prototype.getAvailableBalance = function () {
  */
 AssetModel.prototype.getTotalBalance = function () {
   return this.props.totalBalance
+}
+
+/**
+ * @return {HistoryEntryModel[]}
+ */
+AssetModel.prototype.getHistory = function() {
+  return this.props.historyEntries
 }
 
 /**
@@ -115,6 +122,20 @@ AssetModel.prototype.update = function() {
   self.wallet.getTotalBalance(self.assetdef, function(error, balance) {
     if (error === null)
       updateBalance('totalBalance', balance)
+  })
+
+  self.wallet.getHistory(function(error, entries) {
+    if (error)
+      return
+
+    function entryEqualFn(entry, index) { return entry.getTxId() === entries[index].getTxId() }
+
+    var isEqual = self.props.historyEntries.length === entries.length && self.props.historyEntries.every(entryEqualFn)
+    if (isEqual)
+        return
+
+    self.props.historyEntries = entries.map(function(entry) { return new HistoryEntryModel(entry) })
+    self.emit('update')
   })
 }
 
