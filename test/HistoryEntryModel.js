@@ -44,9 +44,10 @@ describe('HistoryEntryModel', function() {
     expect(historyEntry.getTxId()).to.equal('51e8dfe12367d3a0e9a9c8c558c774b98330561a12a8e3fdc805f6e6d25dc7db')
   })
 
-  // Todo: need convert result to utc...
-  it.skip('getDate', function() {
-    expect(historyEntry.getDate()).to.equal('01/17/70 13:14:47')
+  it('getDate', function() {
+    var date = historyEntry.getDate()
+    var utcDate = Date.parse(date) + new Date().getTimezoneOffset() * 60
+    expect(utcDate).to.equal(1408465400)
   })
 
   it('getValues', function() {
