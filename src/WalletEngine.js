@@ -1,4 +1,6 @@
-var Wallet = require('cc-wallet-core')
+var BIP39 = require('bip39')
+var ccWallet = require('cc-wallet-core')
+var _ = require('lodash')
 
 var AssetModels = require('./AssetModels')
 
@@ -6,13 +8,18 @@ var AssetModels = require('./AssetModels')
 /**
  * @class WalletEngine
  *
- * @param {?} opts
+ * @param {Object} opts
+ * @param {boolean} opts.testnet
  */
 function WalletEngine(opts) {
-  this.wallet = null
-  this.assetModels = null
   this.initialized = false
-  this.updateCallback = function() {}
+  this.setCallback(function() {})
+
+  this.ccWalletOpts = _.extend({
+    testnet: false
+  }, opts)
+  this.ccWallet = null
+  this.assetModels = null
 }
 
 /**
@@ -24,19 +31,21 @@ WalletEngine.prototype.isInitialized = function() {
 
 /**
  * @return {AssetModel[]}
+ * @throws {Error} If wallet not initialized
  */
 WalletEngine.prototype.getAssetModels = function() {
   if (!this.isInitialized())
-    return []
+    throw new Error('Wallet not initialized')
 
   return this.assetModels.getAssetModels()
 }
 
 /**
+ * @throws {Error} If wallet not initialized
  */
 WalletEngine.prototype.update = function() {
   if (!this.isInitialized())
-    return
+    throw new Error('Wallet not initialized')
 
   this.assetModels.update()
 }
@@ -49,34 +58,28 @@ WalletEngine.prototype.setCallback = function(callback) {
 }
 
 /**
- */
-WalletEngine.prototype.initializeFromSeed = function(seed) {
-  var walletOpts = null
-  if (seed === 'test')
-    walletOpts = {
-      masterKey: '123131123131123131123131123131123131123131123131123131',
-      testnet: true
-    }
-
-  if (walletOpts === null)
-    throw new Error('not implemented')
-
-  this.wallet = new Wallet(walletOpts)
-
-  this.assetModels = new AssetModels(this.wallet)
-  this.assetModels.on('update', function() { this.updateCallback() }.bind(this))
-  this.assetModels.update()
-
-  this.initialized = true
-}
-
-/**
- * @param {?} entropy
  * @return {string}
  */
-WalletEngine.prototype.generateRandomSeed = function(entropy) {
-  // TODO
-  return "test"
+WalletEngine.prototype.generateMnemonic = BIP39.generateMnemonic
+
+/**
+ * @param {string} mnemonic
+ * @param {string} [password]
+ * @throws {Error} If already initialized
+ */
+WalletEngine.prototype.initializeFromMnemonic = function(mnemonic, password) {
+  if (this.isInitialized())
+    throw new Error('Already initialized')
+
+  var ccWalletOpts = _.extend({
+    masterKey: BIP39.mnemonicToSeedHex(mnemonic, password)
+  }, this.ccWalletOpts)
+  this.ccWallet = new ccWallet(ccWalletOpts)
+
+  this.assetModels = new AssetModels(this.ccWallet)
+  this.assetModels.on('update', function() { this.updateCallback() }.bind(this))
+
+  this.initialized = true
 }
 
 

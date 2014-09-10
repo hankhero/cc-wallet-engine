@@ -15,6 +15,7 @@
     "url": "https://github.com/fanatid/cc-wallet-engine"
   },
   "dependencies": {
+    "bip39": "2.0.0",
     "cc-wallet-core": "git://github.com/fanatid/cc-wallet-core.git",
     "coloredcoinjs-lib": "git://github.com/fanatid/coloredcoinjs-lib.git",
     "lodash": "2.4.1",
