@@ -1,3 +1,6 @@
+var BIP39 = require('bip39')
+
+
 /**
  * @class PaymentModel
  *
@@ -6,8 +9,9 @@
 function PaymentModel(assetModel) {
   this.assetModel = assetModel
 
-  this.recipients = []
   this.readOnly = false
+  this.recipients = []
+  this.seed = null
 }
 
 /**
@@ -49,6 +53,31 @@ PaymentModel.prototype.addRecipient = function(address, amount) {
 }
 
 /**
+ * @param {string} mnemonic
+ * @param {string} password
+ * @return {boolean}
+ */
+PaymentModel.prototype.checkMnemonic = function(mnemonic, password) {
+  var seed = BIP39.mnemonicToSeedHex(mnemonic, password)
+  return this.assetModel.wallet.isCurrentSeed(seed)
+}
+
+/**
+ * @param {string} mnemonic
+ * @param {string} password
+ * @return {PaymentModel}
+ * @throws {Error} If payment already sent
+ */
+PaymentModel.prototype.setMnemonic = function(mnemonic, password) {
+  if (this.readOnly)
+    throw new Error('payment has already been comitted')
+
+  this.seed = BIP39.mnemonicToSeedHex(mnemonic, password)
+
+  return this
+}
+
+/**
  * @callback PaymentModel~send
  * @param {?Error} error
  */
@@ -56,14 +85,17 @@ PaymentModel.prototype.addRecipient = function(address, amount) {
 /**
  * @param {PaymentModel~send} cb
  * @return {PaymentModel}
- * @throws {Error} If payment already sent or recipients list not filled
+ * @throws {Error} If payment already sent, recipients list not filled or mnemonic not set
  */
 PaymentModel.prototype.send = function(cb) {
   if (this.readOnly)
-    throw new Error('payment has already been comitted')
+    throw new Error('Payment has already been comitted')
 
   if (this.recipients.length === 0)
-    throw new Error('recipients list is empty')
+    throw new Error('Recipients list is empty')
+
+  if (this.seed === null)
+    throw new Error('Mnemonic not set')
 
   var assetdef = this.assetModel.assetdef
 
@@ -75,7 +107,8 @@ PaymentModel.prototype.send = function(cb) {
   }.bind(this))
 
   this.readOnly = true
-  this.assetModel.wallet.sendCoins(this.assetModel.assetdef, rawTargets, cb)
+
+  this.assetModel.wallet.sendCoins(this.seed, this.assetModel.assetdef, rawTargets, cb)
 
   return this
 }

@@ -10,7 +10,8 @@ describe('AssetModel', function() {
   var wallet, assetModel
 
   beforeEach(function(done) {
-    wallet = new ccWallet({ masterKey: '12355564466111166655222222222222', testnet: true })
+    wallet = new ccWallet({ testnet: true })
+    wallet.initialize('12355564466111166655222222222222')
     assetModel = new AssetModel(wallet, wallet.getAssetDefinitionByMoniker('bitcoin'))
     wallet.fullScanAllAddresses(function(error) {
       expect(error).to.be.null

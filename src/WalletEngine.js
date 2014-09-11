@@ -12,42 +12,14 @@ var AssetModels = require('./AssetModels')
  * @param {boolean} opts.testnet
  */
 function WalletEngine(opts) {
-  this.initialized = false
   this.setCallback(function() {})
-
-  this.ccWalletOpts = _.extend({
-    testnet: false
-  }, opts)
-  this.ccWallet = null
   this.assetModels = null
-}
 
-/**
- * @return {boolean}
- */
-WalletEngine.prototype.isInitialized = function() {
-  return this.initialized
-}
+  opts = _.extend({ testnet: false }, opts)
+  this.ccWallet = new ccWallet(opts)
 
-/**
- * @return {AssetModel[]}
- * @throws {Error} If wallet not initialized
- */
-WalletEngine.prototype.getAssetModels = function() {
-  if (!this.isInitialized())
-    throw new Error('Wallet not initialized')
-
-  return this.assetModels.getAssetModels()
-}
-
-/**
- * @throws {Error} If wallet not initialized
- */
-WalletEngine.prototype.update = function() {
-  if (!this.isInitialized())
-    throw new Error('Wallet not initialized')
-
-  this.assetModels.update()
+  if (this.isInitialized())
+    this._initializeWalletEngine()
 }
 
 /**
@@ -63,23 +35,54 @@ WalletEngine.prototype.setCallback = function(callback) {
 WalletEngine.prototype.generateMnemonic = BIP39.generateMnemonic
 
 /**
+ * @return {boolean}
+ */
+WalletEngine.prototype.isCurrentMnemonic = function(mnemonic, password) {
+  var seed = BIP39.mnemonicToSeedHex(mnemonic, password)
+  return this.ccWallet.isCurrentSeed(seed)
+}
+
+/**
+ * @return {boolean}
+ */
+WalletEngine.prototype.isInitialized = function() {
+  return this.ccWallet.isInitialized()
+}
+
+/**
  * @param {string} mnemonic
  * @param {string} [password]
  * @throws {Error} If already initialized
  */
-WalletEngine.prototype.initializeFromMnemonic = function(mnemonic, password) {
-  if (this.isInitialized())
-    throw new Error('Already initialized')
+WalletEngine.prototype.initialize = function(mnemonic, password) {
+  var seed = BIP39.mnemonicToSeedHex(mnemonic, password)
+  this.ccWallet.initialize(seed)
 
-  var ccWalletOpts = _.extend({
-    masterKey: BIP39.mnemonicToSeedHex(mnemonic, password)
-  }, this.ccWalletOpts)
-  this.ccWallet = new ccWallet(ccWalletOpts)
+  this._initializeWalletEngine()
+}
 
+/**
+ */
+WalletEngine.prototype._initializeWalletEngine = function() {
   this.assetModels = new AssetModels(this.ccWallet)
   this.assetModels.on('update', function() { this.updateCallback() }.bind(this))
+}
 
-  this.initialized = true
+/**
+ * @return {AssetModel[]}
+ * @throws {Error} If wallet not initialized
+ */
+WalletEngine.prototype.getAssetModels = function() {
+  this.ccWallet.isInitializedCheck()
+  return this.assetModels.getAssetModels()
+}
+
+/**
+ * @throws {Error} If wallet not initialized
+ */
+WalletEngine.prototype.update = function() {
+  this.ccWallet.isInitializedCheck()
+  this.assetModels.update()
 }
 
 

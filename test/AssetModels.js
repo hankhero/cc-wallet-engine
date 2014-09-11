@@ -11,7 +11,8 @@ describe('AssetModels', function() {
   var wallet, assetModels
 
   beforeEach(function() {
-    wallet = new ccWallet({ masterKey: '12355564466111166655222222222222', testnet: true })
+    wallet = new ccWallet({ testnet: true })
+    wallet.initialize('12355564466111166655222222222222')
     assetModels = new AssetModels(wallet)
   })
 
