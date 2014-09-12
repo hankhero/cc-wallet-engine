@@ -1,5 +1,5 @@
 var _ = require('lodash')
-var strftime = require('strftime')
+var moment = require('moment')
 
 
 /**
@@ -23,8 +23,8 @@ HistoryEntryModel.prototype.getTxId = function() {
  */
 HistoryEntryModel.prototype.getDate = function() {
   var timezoneOffset = new Date().getTimezoneOffset() * 60
-  var date = new Date(this.historyEntry.getTimestamp() - timezoneOffset)
-  return strftime('%m/%d/%y %H:%M:%S', date)
+  var date = this.historyEntry.getTimestamp() - timezoneOffset
+  return moment(date*1000).format('MM/DD/YY HH:mm:ss')
 }
 
 /**

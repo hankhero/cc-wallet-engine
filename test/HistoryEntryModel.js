@@ -2,6 +2,7 @@ var expect = require('chai').expect
 
 var ccWallet = require('cc-wallet-core')
 var _ = require('lodash')
+var moment = require('moment')
 
 var AssetModels = require('../src/AssetModels')
 var AssetModel = require('../src/AssetModel')
@@ -46,9 +47,9 @@ describe('HistoryEntryModel', function() {
   })
 
   it('getDate', function() {
-    var date = historyEntry.getDate()
-    var utcDate = Date.parse(date) + new Date().getTimezoneOffset() * 60
-    expect(utcDate).to.equal(1408465400)
+    var date = moment(historyEntry.getDate(), 'MM/DD/YY HH:mm:ss')
+    date = date.unix() + new Date().getTimezoneOffset() * 60
+    expect(date).to.equal(1408465527)
   })
 
   it('getValues', function() {
