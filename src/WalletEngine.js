@@ -70,19 +70,19 @@ WalletEngine.prototype._initializeWalletEngine = function() {
 
 /**
  * @return {AssetModel[]}
- * @throws {Error} If wallet not initialized
  */
 WalletEngine.prototype.getAssetModels = function() {
-  this.ccWallet.isInitializedCheck()
-  return this.assetModels.getAssetModels()
+  if (this.isInitialized()) {
+      return this.assetModels.getAssetModels();
+  } else {
+      return [];
+  }
 }
 
-/**
- * @throws {Error} If wallet not initialized
- */
 WalletEngine.prototype.update = function() {
-  this.ccWallet.isInitializedCheck()
-  this.assetModels.update()
+  if (this.isInitialized()) {
+      this.assetModels.update();
+  }
 }
 
 
