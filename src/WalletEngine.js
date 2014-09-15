@@ -79,6 +79,21 @@ WalletEngine.prototype.getAssetModels = function() {
   }
 }
 
+
+WalletEngine.prototype.getHistory = function () {
+    if (!this.isInitialized())
+        return [];
+
+    var entries = [];
+
+    this.assetModels.getAssetModels().forEach(function (am) {
+        entries = entries.concat(am.getHistory());
+    });
+
+    return entries;
+};
+
+
 WalletEngine.prototype.update = function() {
   if (this.isInitialized()) {
       this.assetModels.update();
