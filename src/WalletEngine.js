@@ -4,6 +4,8 @@ var _ = require('lodash')
 
 var AssetModels = require('./AssetModels')
 
+var store = require('store');
+
 
 /**
  * @class WalletEngine
@@ -55,6 +57,11 @@ WalletEngine.prototype.isInitialized = function() {
  * @throws {Error} If already initialized
  */
 WalletEngine.prototype.initialize = function(mnemonic, password) {
+
+    //TODO: temporary
+    store.set('temp_cc_mnemonic', mnemonic);
+    store.set('temp_cc_password', password);
+
   var seed = BIP39.mnemonicToSeedHex(mnemonic, password)
   this.ccWallet.initialize(seed)
 
@@ -64,6 +71,12 @@ WalletEngine.prototype.initialize = function(mnemonic, password) {
 /**
  */
 WalletEngine.prototype._initializeWalletEngine = function() {
+    //TODO: temporary
+
+  this.temp_mnemonic = store.get('temp_cc_mnemonic');
+  this.temp_password = store.get('temp_cc_password');
+
+
   this.assetModels = new AssetModels(this.ccWallet)
   this.assetModels.on('update', function() { this.updateCallback() }.bind(this))
 }

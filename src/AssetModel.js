@@ -94,7 +94,8 @@ AssetModel.prototype.update = function() {
     self.emit('update')
   }
 
-  var address = self.wallet.getSomeAddress(self.assetdef, true)
+  var isBitcoin = (self.assetdef.getId() == 'JNu4AFCBNmTE1');
+  var address = self.wallet.getSomeAddress(self.assetdef, !isBitcoin)
   if (self.props.address !== address) {
     self.props.address = address
     self.emit('update')
@@ -111,17 +112,20 @@ AssetModel.prototype.update = function() {
 
   self.wallet.getUnconfirmedBalance(self.assetdef, function(error, balance) {
     if (error === null)
-      updateBalance('unconfirmedBalance', balance)
+      updateBalance('unconfirmedBalance', balance);
+    else console.log(error);                                      
   })
 
   self.wallet.getAvailableBalance(self.assetdef, function(error, balance) {
     if (error === null)
-      updateBalance('availableBalance', balance)
+      updateBalance('availableBalance', balance);
+    else console.log(error);
   })
 
   self.wallet.getTotalBalance(self.assetdef, function(error, balance) {
     if (error === null)
-      updateBalance('totalBalance', balance)
+      updateBalance('totalBalance', balance);
+    else console.log(error);
   })
 
   self.wallet.getHistory(function(error, entries) {
