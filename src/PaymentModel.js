@@ -9,7 +9,8 @@ var BIP39 = require('bip39')
 function PaymentModel(assetModel) {
   this.assetModel = assetModel
 
-  this.readOnly = false
+  this.readOnly = false;
+  this.status = null;
   this.recipients = []
   this.seed = null
 }
@@ -88,6 +89,7 @@ PaymentModel.prototype.setMnemonic = function(mnemonic, password) {
  * @throws {Error} If payment already sent, recipients list not filled or mnemonic not set
  */
 PaymentModel.prototype.send = function(cb) {
+  var self = this;
   if (this.readOnly)
     throw new Error('Payment has already been comitted')
 
@@ -106,19 +108,33 @@ PaymentModel.prototype.send = function(cb) {
     }
   }.bind(this))
 
-  this.readOnly = true
+  this.readOnly = true;
+  this.status = 'sending';
 
-  this.assetModel.wallet.sendCoins(this.seed, this.assetModel.assetdef, rawTargets, cb)
+  function sendCoinsCallback(err, txid) {
+      if (err) {
+          console.log(err);
+          self.status = 'failed';
+      } else self.status = 'sent';
+      self.assetModel.update();
+      cb(err, txid);
+  }
+
+  this.assetModel.wallet.sendCoins(
+      this.seed, this.assetModel.assetdef, rawTargets,
+      sendCoinsCallback);
 
   return this
 }
+
+// 'fresh', 'sending', 'sent', 'failed'
 
 /**
  * @return {string}
  */
 PaymentModel.prototype.getStatus = function() {
-  var status = this.readOnly ? 'sent' : 'fresh'
-  return status
+    if (!this.readOnly) return 'fresh';
+    else return this.status;
 }
 
 
