@@ -42,9 +42,14 @@ HistoryEntryModel.prototype.getTxId = function() {
  * @return {string}
  */
 HistoryEntryModel.prototype.getDate = function() {
-  var timezoneOffset = new Date().getTimezoneOffset() * 60
-  var date = this.historyEntry.getTimestamp() - timezoneOffset
-  return moment(date*1000).format('MM/DD/YY HH:mm:ss')
+    var timestamp = this.historyEntry.getTimestamp();
+    if (timestamp) {
+        var timezoneOffset = new Date().getTimezoneOffset() * 60;
+        var date = timestamp - timezoneOffset;
+        return moment(date*1000).format('MM/DD/YY HH:mm:ss');
+    } else {
+        return 'unconfirmed';
+    }
 }
 
 /**

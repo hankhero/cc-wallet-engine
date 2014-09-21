@@ -46,7 +46,7 @@ AssetModels.prototype.update = function() {
     var assetId = assetdef.getId()
 
     if (_.isUndefined(self.models[assetId])) {
-      self.models[assetId] = new AssetModel(self.wallet, assetdef)
+      self.models[assetId] = new AssetModel(self.wallet, assetdef);
       self.models[assetId].on('update', function() { self.emit('update') })
 
       self.emit('update')

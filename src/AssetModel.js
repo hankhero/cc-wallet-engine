@@ -3,6 +3,7 @@ var util = require('util')
 
 var HistoryEntryModel = require('./HistoryEntryModel')
 var PaymentModel = require('./PaymentModel')
+var _ = require('lodash')
 
 
 /**
@@ -138,7 +139,9 @@ AssetModel.prototype.update = function() {
     if (isEqual)
         return
 
-    self.props.historyEntries = entries.map(function(entry) { return new HistoryEntryModel(entry) })
+    self.props.historyEntries = entries.map(function(entry) { 
+        return new HistoryEntryModel(entry);
+    }).reverse();
     self.emit('update')
   })
 }
