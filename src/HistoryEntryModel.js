@@ -2,6 +2,26 @@ var _ = require('lodash')
 var moment = require('moment')
 
 
+function AssetTargetModel(assetTarget) {
+    this.address = assetTarget.getAddress();
+    var value = assetTarget.getValue(),
+        asset = assetTarget.getAsset();
+    this.formattedValue = asset.formatValue(value);
+    this.assetMoniker = asset.getMonikers()[0];
+}
+
+AssetTargetModel.prototype.getAddress = function () {
+    return this.address;
+};
+AssetTargetModel.prototype.getAssetMoniker = function () {
+    return this.assetMoniker;
+};
+AssetTargetModel.prototype.getFormattedValue = function () {
+    return this.formattedValue;
+};
+
+
+
 /**
  * @class HistoryEntryModel
  *
@@ -39,21 +59,12 @@ HistoryEntryModel.prototype.getValues = function() {
 }
 
 /**
- * @typedef {Object} HistoryTarget
- * @property {string} address0
- * @property {string} address1
- * @property {string} addressN
- */
-
-/**
- * @return {HistoryTarget}
+ * @return {AssetTargetModel[]}
  */
 HistoryEntryModel.prototype.getTargets = function() {
-  var targets = this.historyEntry.getTargets().map(function(at) {
-    return [at.getAddress(), at.getAsset().formatValue(at.getValue())]
-  })
-
-  return _.object(targets)
+    return this.historyEntry.getTargets().map(function(at) {
+        return new AssetTargetModel(at);
+    });
 }
 
 /**
@@ -61,6 +72,13 @@ HistoryEntryModel.prototype.getTargets = function() {
  */
 HistoryEntryModel.prototype.isSend = function() {
   return this.historyEntry.isSend()
+}
+
+/**
+ * @return {boolean}
+ */
+HistoryEntryModel.prototype.isTrade = function() {
+    return false; // TODO
 }
 
 /**
