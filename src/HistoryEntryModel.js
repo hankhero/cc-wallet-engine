@@ -2,6 +2,7 @@ var _ = require('lodash')
 var moment = require('moment')
 
 
+// Todo: move to AssetTargetModel.js
 function AssetTargetModel(assetTarget) {
   this.address = assetTarget.getAddress()
   var value = assetTarget.getValue(),
