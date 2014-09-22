@@ -5,7 +5,7 @@ var _ = require('lodash')
 
 var AssetModel = require('./AssetModel')
 
-var decode_bitcoin_uri = require('./uri_decoder').decode_bitcoin_uri;
+var decode_bitcoin_uri = require('./uri_decoder').decode_bitcoin_uri
 
 
 /**
@@ -48,7 +48,7 @@ AssetModels.prototype.update = function() {
     var assetId = assetdef.getId()
 
     if (_.isUndefined(self.models[assetId])) {
-      self.models[assetId] = new AssetModel(self.wallet, assetdef);
+      self.models[assetId] = new AssetModel(self.wallet, assetdef)
       self.models[assetId].on('update', function() { self.emit('update') })
 
       self.emit('update')
@@ -59,14 +59,16 @@ AssetModels.prototype.update = function() {
 }
 
 AssetModels.prototype.getAssetForURI = function (uri) {
-    var params = decode_bitcoin_uri(uri);
-    if (!params || !params.address)
-        return null;
-    var asset_id = params.asset_id;
-    if (!asset_id)
-        asset_id = 'JNu4AFCBNmTE1'; // asset_id for bitcoin
-    return this.models[asset_id];
-};
+  var params = decode_bitcoin_uri(uri)
+  if (!params || !params.address)
+    return null
+
+  var asset_id = params.asset_id
+  if (!asset_id)
+    asset_id = 'JNu4AFCBNmTE1' // asset_id for bitcoin
+
+  return this.models[asset_id]
+}
 
 
 module.exports = AssetModels

@@ -4,7 +4,7 @@ var _ = require('lodash')
 
 var AssetModels = require('./AssetModels')
 
-var store = require('store');
+var store = require('store')
 
 
 /**
@@ -57,12 +57,10 @@ WalletEngine.prototype.isInitialized = function() {
  * @throws {Error} If already initialized
  */
 WalletEngine.prototype.initialize = function(mnemonic, password) {
-
-
-  var seed = BIP39.mnemonicToSeedHex(mnemonic, password);
+  var seed = BIP39.mnemonicToSeedHex(mnemonic, password)
 
   //TODO: temporary
-  store.set('temp_cc_seed', seed);
+  store.set('temp_cc_seed', seed)
 
   this.ccWallet.initialize(seed)
   this._initializeWalletEngine()
@@ -71,8 +69,8 @@ WalletEngine.prototype.initialize = function(mnemonic, password) {
 /**
  */
 WalletEngine.prototype._initializeWalletEngine = function() {
-    //TODO: temporary
-  this.ccWallet.temp_seed = store.get('temp_cc_seed');
+  //TODO: temporary
+  this.ccWallet.temp_seed = store.get('temp_cc_seed')
 
   this.assetModels = new AssetModels(this.ccWallet)
   this.assetModels.on('update', function() { this.updateCallback() }.bind(this))
@@ -82,38 +80,39 @@ WalletEngine.prototype._initializeWalletEngine = function() {
  * @return {AssetModel[]}
  */
 WalletEngine.prototype.getAssetModels = function() {
-  if (this.isInitialized()) {
-      return this.assetModels.getAssetModels();
-  } else {
-      return [];
-  }
+  if (!this.isInitialized())
+    return []
+
+  return this.assetModels.getAssetModels()
 }
 
-
+/**
+ */
 WalletEngine.prototype.getHistory = function () {
-    if (!this.isInitialized())
-        return [];
+  if (!this.isInitialized())
+    return []
 
-    var entries = [];
+  var assetsEntries = this.assetModels.getAssetModels().map(function(am) {
+    return am.getHistory()
+  })
 
-    this.assetModels.getAssetModels().forEach(function (am) {
-        entries = entries.concat(am.getHistory());
-    });
-
-    return entries;
-};
-
-
-WalletEngine.prototype.update = function() {
-  if (this.isInitialized()) {
-      this.assetModels.update();
-  }
+  return _.flatten(assetsEntries)
 }
 
+/**
+ */
+WalletEngine.prototype.update = function() {
+  if (this.isInitialized())
+    this.assetModels.update()
+}
+
+/**
+ */
 WalletEngine.prototype.getAssetForURI = function (uri) {
-    if (!this.isInitialized())
-        return null;
-    return this.assetModels.getAssetForURI(uri);
+  if (!this.isInitialized())
+    return null
+
+  return this.assetModels.getAssetForURI(uri)
 }
 
 
