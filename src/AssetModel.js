@@ -5,6 +5,8 @@ var HistoryEntryModel = require('./HistoryEntryModel')
 var PaymentModel = require('./PaymentModel')
 var _ = require('lodash')
 
+var decode_bitcoin_uri = require('./uri_decoder').decode_bitcoin_uri;
+
 
 /**
  * @class AssetModel
@@ -82,6 +84,26 @@ AssetModel.prototype.getHistory = function() {
 AssetModel.prototype.makePayment = function() {
   return new PaymentModel(this)
 }
+
+
+// TODO: we should create PaymentModel instead of 
+// decoding URI
+AssetModel.prototype.decodePaymentURI = function (uri) {
+    var params = decode_bitcoin_uri(uri);
+    if (!params || !params.address)
+        throw new Error('wrong payment URI');
+    var asset_id = params.asset_id;
+    if (!asset_id)
+        asset_id = 'JNu4AFCBNmTE1'; // asset_id for bitcoin
+    if (asset_id != this.assetdef.getId())
+        throw new Error('wrong payment URI (wrong asset)');
+    var coloraddress = params.address;
+    if (asset_id != 'JNu4AFCBNmTE1')
+        coloraddress = asset_id + "@" + coloraddress;
+    return {address: coloraddress,
+            amount: params.amount};
+}
+
 
 /**
  * Update current AssetModel

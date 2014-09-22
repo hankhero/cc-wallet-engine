@@ -5,6 +5,8 @@ var _ = require('lodash')
 
 var AssetModel = require('./AssetModel')
 
+var decode_bitcoin_uri = require('./uri_decoder').decode_bitcoin_uri;
+
 
 /**
  * @class AssetModels
@@ -55,6 +57,16 @@ AssetModels.prototype.update = function() {
     self.models[assetId].update()
   })
 }
+
+AssetModels.prototype.getAssetForURI = function (uri) {
+    var params = decode_bitcoin_uri(uri);
+    if (!params || !params.address)
+        return null;
+    var asset_id = params.asset_id;
+    if (!asset_id)
+        asset_id = 'JNu4AFCBNmTE1'; // asset_id for bitcoin
+    return this.models[asset_id];
+};
 
 
 module.exports = AssetModels

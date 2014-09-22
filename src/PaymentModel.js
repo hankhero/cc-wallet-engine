@@ -12,7 +12,8 @@ function PaymentModel(assetModel) {
   this.readOnly = false;
   this.status = null;
   this.recipients = []
-  this.seed = null
+  //this.seed = null
+  this.seed = assetModel.wallet.temp_seed;
 }
 
 /**

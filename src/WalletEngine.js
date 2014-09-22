@@ -58,13 +58,13 @@ WalletEngine.prototype.isInitialized = function() {
  */
 WalletEngine.prototype.initialize = function(mnemonic, password) {
 
-    //TODO: temporary
-    store.set('temp_cc_mnemonic', mnemonic);
-    store.set('temp_cc_password', password);
 
-  var seed = BIP39.mnemonicToSeedHex(mnemonic, password)
+  var seed = BIP39.mnemonicToSeedHex(mnemonic, password);
+
+  //TODO: temporary
+  store.set('temp_cc_seed', seed);
+
   this.ccWallet.initialize(seed)
-
   this._initializeWalletEngine()
 }
 
@@ -72,10 +72,7 @@ WalletEngine.prototype.initialize = function(mnemonic, password) {
  */
 WalletEngine.prototype._initializeWalletEngine = function() {
     //TODO: temporary
-
-  this.temp_mnemonic = store.get('temp_cc_mnemonic');
-  this.temp_password = store.get('temp_cc_password');
-
+  this.ccWallet.temp_seed = store.get('temp_cc_seed');
 
   this.assetModels = new AssetModels(this.ccWallet)
   this.assetModels.on('update', function() { this.updateCallback() }.bind(this))
@@ -111,6 +108,12 @@ WalletEngine.prototype.update = function() {
   if (this.isInitialized()) {
       this.assetModels.update();
   }
+}
+
+WalletEngine.prototype.getAssetForURI = function (uri) {
+    if (!this.isInitialized())
+        return null;
+    return this.assetModels.getAssetForURI(uri);
 }
 
 
