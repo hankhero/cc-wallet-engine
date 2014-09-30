@@ -151,7 +151,7 @@ AssetModel.prototype.update = function() {
     else console.log(error);
   })
 
-  self.wallet.getHistory(function(error, entries) {
+  self.wallet.getHistory(self.assetdef, function(error, entries) {
     if (error)
       return
 
