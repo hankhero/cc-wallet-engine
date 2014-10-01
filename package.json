@@ -12,12 +12,12 @@
   ],
   "repository": {
     "type": "git",
-    "url": "https://github.com/fanatid/cc-wallet-engine"
+    "url": "https://github.com/chromaway/cc-wallet-engine"
   },
   "dependencies": {
     "bip39": "2.0.0",
-    "cc-wallet-core": "git://github.com/fanatid/cc-wallet-core.git",
-    "coloredcoinjs-lib": "git://github.com/fanatid/coloredcoinjs-lib.git",
+    "cc-wallet-core": "git://github.com/chromaway/cc-wallet-core.git",
+    "coloredcoinjs-lib": "git://github.com/chromaway/coloredcoinjs-lib.git",
     "lodash": "2.4.1",
     "moment": "2.8.3",
      "store": "1.3.16"
