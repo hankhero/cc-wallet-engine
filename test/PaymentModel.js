@@ -110,11 +110,7 @@ describe('PaymentModel', function() {
     expect(paymentModel.send).to.throw(Error)
   })
 
-  it('getStatus return sent', function() {
-    paymentModel.readOnly = true
-    expect(paymentModel.getStatus()).to.equal('sent')
-  })
-
+  // Todo: check other status
   it('getStatus return fresh', function() {
     expect(paymentModel.getStatus()).to.equal('fresh')
   })

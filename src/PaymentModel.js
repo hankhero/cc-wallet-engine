@@ -9,11 +9,11 @@ var BIP39 = require('bip39')
 function PaymentModel(assetModel) {
   this.assetModel = assetModel
 
-  this.readOnly = false;
-  this.status = null;
+  this.readOnly = false
+  this.status = null
   this.recipients = []
   //this.seed = null
-  this.seed = assetModel.wallet.temp_seed;
+  this.seed = assetModel.wallet.temp_seed
 }
 
 /**
@@ -90,7 +90,7 @@ PaymentModel.prototype.setMnemonic = function(mnemonic, password) {
  * @throws {Error} If payment already sent, recipients list not filled or mnemonic not set
  */
 PaymentModel.prototype.send = function(cb) {
-  var self = this;
+  var self = this
   if (this.readOnly)
     throw new Error('Payment has already been comitted')
 
@@ -109,21 +109,21 @@ PaymentModel.prototype.send = function(cb) {
     }
   }.bind(this))
 
-  this.readOnly = true;
-  this.status = 'sending';
+  this.readOnly = true
+  this.status = 'sending'
 
   function sendCoinsCallback(err, txid) {
-      if (err) {
-          console.log(err);
-          self.status = 'failed';
-      } else self.status = 'sent';
-      self.assetModel.update();
-      cb(err, txid);
+    if (err)
+      console.error(err)
+
+    self.status = err ? 'failed' : 'send'
+    self.assetModel.update()
+
+    cb(err, txid)
   }
 
   this.assetModel.wallet.sendCoins(
-      this.seed, this.assetModel.assetdef, rawTargets,
-      sendCoinsCallback);
+    this.seed, this.assetModel.assetdef, rawTargets, sendCoinsCallback)
 
   return this
 }
@@ -134,8 +134,10 @@ PaymentModel.prototype.send = function(cb) {
  * @return {string}
  */
 PaymentModel.prototype.getStatus = function() {
-    if (!this.readOnly) return 'fresh';
-    else return this.status;
+  if (!this.readOnly)
+    return 'fresh'
+
+  return this.status
 }
 
 

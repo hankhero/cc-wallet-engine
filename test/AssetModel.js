@@ -30,7 +30,7 @@ describe('AssetModel', function() {
         return
 
       expect(assetModel.getMoniker()).to.equal('bitcoin')
-      expect(assetModel.getAddress()).to.equal('JNu4AFCBNmTE1@mv4jLE114t8KHL3LExNGBTXiP2dCjkaWJh')
+      expect(assetModel.getAddress()).to.equal('mv4jLE114t8KHL3LExNGBTXiP2dCjkaWJh')
       expect(assetModel.getUnconfirmedBalance()).to.equal('0.00000000')
       expect(assetModel.getAvailableBalance()).to.equal('0.01000000')
       expect(assetModel.getTotalBalance()).to.equal('0.01000000')

@@ -2,24 +2,27 @@ var _ = require('lodash')
 var moment = require('moment')
 
 
+// Todo: move to AssetTargetModel.js
 function AssetTargetModel(assetTarget) {
-    this.address = assetTarget.getAddress();
-    var value = assetTarget.getValue(),
-        asset = assetTarget.getAsset();
-    this.formattedValue = asset.formatValue(value);
-    this.assetMoniker = asset.getMonikers()[0];
+  this.address = assetTarget.getAddress()
+  var value = assetTarget.getValue(),
+    asset = assetTarget.getAsset()
+
+  this.formattedValue = asset.formatValue(value)
+  this.assetMoniker = asset.getMonikers()[0]
 }
 
 AssetTargetModel.prototype.getAddress = function () {
-    return this.address;
-};
-AssetTargetModel.prototype.getAssetMoniker = function () {
-    return this.assetMoniker;
-};
-AssetTargetModel.prototype.getFormattedValue = function () {
-    return this.formattedValue;
-};
+  return this.address
+}
 
+AssetTargetModel.prototype.getAssetMoniker = function () {
+  return this.assetMoniker
+}
+
+AssetTargetModel.prototype.getFormattedValue = function () {
+  return this.formattedValue
+}
 
 
 /**
@@ -42,14 +45,13 @@ HistoryEntryModel.prototype.getTxId = function() {
  * @return {string}
  */
 HistoryEntryModel.prototype.getDate = function() {
-    var timestamp = this.historyEntry.getTimestamp();
-    if (timestamp) {
-        var timezoneOffset = new Date().getTimezoneOffset() * 60;
-        var date = timestamp - timezoneOffset;
-        return moment(date*1000).format('MM/DD/YY HH:mm:ss');
-    } else {
-        return 'unconfirmed';
-    }
+  var timestamp = this.historyEntry.getTimestamp()
+  if (!timestamp)
+    return 'unconfirmed'
+
+  var timezoneOffset = new Date().getTimezoneOffset() * 60
+  var date = timestamp - timezoneOffset
+  return moment(date*1000).format('MM/DD/YY HH:mm:ss')
 }
 
 /**
@@ -67,9 +69,9 @@ HistoryEntryModel.prototype.getValues = function() {
  * @return {AssetTargetModel[]}
  */
 HistoryEntryModel.prototype.getTargets = function() {
-    return this.historyEntry.getTargets().map(function(at) {
-        return new AssetTargetModel(at);
-    });
+  return this.historyEntry.getTargets().map(function(at) {
+    return new AssetTargetModel(at)
+  })
 }
 
 /**
@@ -83,7 +85,7 @@ HistoryEntryModel.prototype.isSend = function() {
  * @return {boolean}
  */
 HistoryEntryModel.prototype.isTrade = function() {
-    return false; // TODO
+  return false // TODO
 }
 
 /**

@@ -5,7 +5,7 @@ var HistoryEntryModel = require('./HistoryEntryModel')
 var PaymentModel = require('./PaymentModel')
 var _ = require('lodash')
 
-var decode_bitcoin_uri = require('./uri_decoder').decode_bitcoin_uri;
+var decode_bitcoin_uri = require('./uri_decoder').decode_bitcoin_uri
 
 
 /**
@@ -89,19 +89,21 @@ AssetModel.prototype.makePayment = function() {
 // TODO: we should create PaymentModel instead of 
 // decoding URI
 AssetModel.prototype.decodePaymentURI = function (uri) {
-    var params = decode_bitcoin_uri(uri);
-    if (!params || !params.address)
-        throw new Error('wrong payment URI');
-    var asset_id = params.asset_id;
-    if (!asset_id)
-        asset_id = 'JNu4AFCBNmTE1'; // asset_id for bitcoin
-    if (asset_id != this.assetdef.getId())
-        throw new Error('wrong payment URI (wrong asset)');
-    var coloraddress = params.address;
-    if (asset_id != 'JNu4AFCBNmTE1')
-        coloraddress = asset_id + "@" + coloraddress;
-    return {address: coloraddress,
-            amount: params.amount};
+  var params = decode_bitcoin_uri(uri)
+  if (!params || !params.address)
+    throw new Error('wrong payment URI')
+
+  var asset_id = params.asset_id
+  if (!asset_id)
+    asset_id = 'JNu4AFCBNmTE1' // asset_id for bitcoin
+  if (asset_id != this.assetdef.getId())
+    throw new Error('wrong payment URI (wrong asset)')
+
+  var coloraddress = params.address
+  if (asset_id != 'JNu4AFCBNmTE1')
+    coloraddress = asset_id + "@" + coloraddress
+
+  return { address: coloraddress, amount: params.amount }
 }
 
 
@@ -117,7 +119,7 @@ AssetModel.prototype.update = function() {
     self.emit('update')
   }
 
-  var isBitcoin = (self.assetdef.getId() == 'JNu4AFCBNmTE1');
+  var isBitcoin = (self.assetdef.getId() == 'JNu4AFCBNmTE1')
   var address = self.wallet.getSomeAddress(self.assetdef, !isBitcoin)
   if (self.props.address !== address) {
     self.props.address = address
@@ -135,20 +137,20 @@ AssetModel.prototype.update = function() {
 
   self.wallet.getUnconfirmedBalance(self.assetdef, function(error, balance) {
     if (error === null)
-      updateBalance('unconfirmedBalance', balance);
-    else console.log(error);                                      
+      updateBalance('unconfirmedBalance', balance)
+    else console.log(error)
   })
 
   self.wallet.getAvailableBalance(self.assetdef, function(error, balance) {
     if (error === null)
-      updateBalance('availableBalance', balance);
-    else console.log(error);
+      updateBalance('availableBalance', balance)
+    else console.log(error)
   })
 
   self.wallet.getTotalBalance(self.assetdef, function(error, balance) {
     if (error === null)
-      updateBalance('totalBalance', balance);
-    else console.log(error);
+      updateBalance('totalBalance', balance)
+    else console.log(error)
   })
 
   self.wallet.getHistory(self.assetdef, function(error, entries) {
@@ -162,8 +164,9 @@ AssetModel.prototype.update = function() {
         return
 
     self.props.historyEntries = entries.map(function(entry) { 
-        return new HistoryEntryModel(entry);
-    }).reverse();
+        return new HistoryEntryModel(entry)
+    }).reverse()
+
     self.emit('update')
   })
 }
