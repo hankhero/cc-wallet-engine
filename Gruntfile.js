@@ -74,13 +74,6 @@ module.exports = function(grunt) {
     uglify: {
       production: {
         files: {
-          'cc-wallet-core.min.js': 'cc-wallet-core.js'
-        }
-      }
-    },
-    uglify: {
-      production: {
-        files: {
           'cc-wallet-engine.min.js': 'cc-wallet-engine.js'
         }
       }
