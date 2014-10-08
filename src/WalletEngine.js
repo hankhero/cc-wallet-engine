@@ -35,6 +35,7 @@ WalletEngine.prototype.setCallback = function(callback) {
 WalletEngine.prototype.generateMnemonic = BIP39.generateMnemonic
 
 /**
+ * TODO rename to more fitting isCurrentSeed 
  * @return {boolean}
  */
 WalletEngine.prototype.isCurrentMnemonic = function(mnemonic, password) {
@@ -46,7 +47,35 @@ WalletEngine.prototype.isCurrentMnemonic = function(mnemonic, password) {
  * @return {boolean}
  */
 WalletEngine.prototype.isInitialized = function() {
-  return this.ccWallet.isInitialized() // FIXME add check for seed
+  return this.ccWallet.isInitialized()
+}
+
+/**
+ * @return {boolean}
+ */
+WalletEngine.prototype.hasSeed = function() {
+  return !!this._seed
+}
+
+/**
+ * @return {string}
+ */
+WalletEngine.prototype.getSeed = function() {
+  return this._seed
+}
+
+/**
+ * @param {string} mnemonic
+ * @param {string} [password]
+ * @throws {Error} If wrong seed
+ */
+WalletEngine.prototype.setSeed = function(mnemonic, password) {
+  if (this.isInitialized() && !this.isCurrentMnemonic(mnemonic, password)){
+    throw new Error('Wrong seed')
+  }
+
+  // only ever store see here and only in ram
+  this._seed = BIP39.mnemonicToSeedHex(mnemonic, password)
 }
 
 /**
@@ -55,9 +84,8 @@ WalletEngine.prototype.isInitialized = function() {
  * @throws {Error} If already initialized
  */
 WalletEngine.prototype.initialize = function(mnemonic, password) {
-  // only ever store see here and only in ram
-  this.seed = BIP39.mnemonicToSeedHex(mnemonic, password)
-  this.ccWallet.initialize(this.seed)
+  this.setSeed(mnemonic, password)
+  this.ccWallet.initialize(this._seed)
   this._initializeWalletEngine()
 }
 
