@@ -18,7 +18,7 @@ function WalletEngine(opts) {
   opts = _.extend({ testnet: false }, opts)
   this.ccWallet = new ccWallet(opts)
 
-  if (this.isInitialized())
+  if (this.ccWallet.isInitialized())
     this._initializeWalletEngine()
 }
 
@@ -47,21 +47,42 @@ WalletEngine.prototype.isCurrentMnemonic = function(mnemonic, password) {
  * @return {boolean}
  */
 WalletEngine.prototype.isInitialized = function() {
-  return this.ccWallet.isInitialized()
+  return !!this.getSeed() && !!this.getPin() && this.ccWallet.isInitialized();
+}
+
+/**
+ * @return {boolean}
+ */
+WalletEngine.prototype.hasPin = function() {
+  return !!this._pin;
+}
+
+/**
+ * @return {string}
+ */
+WalletEngine.prototype.getPin = function() {
+  return this._pin;
+}
+
+/**
+ * @param {strin} pin
+ */
+WalletEngine.prototype.setPin = function(pin) {
+  this._pin = pin;
 }
 
 /**
  * @return {boolean}
  */
 WalletEngine.prototype.hasSeed = function() {
-  return !!this._seed
+  return !!this.getSeed();
 }
 
 /**
  * @return {string}
  */
 WalletEngine.prototype.getSeed = function() {
-  return this._seed
+  return this._seed;
 }
 
 /**
@@ -70,12 +91,19 @@ WalletEngine.prototype.getSeed = function() {
  * @throws {Error} If wrong seed
  */
 WalletEngine.prototype.setSeed = function(mnemonic, password) {
-  if (this.isInitialized() && !this.isCurrentMnemonic(mnemonic, password)){
-    throw new Error('Wrong seed')
+  if (this.ccWallet.isInitialized() && !this.isCurrentMnemonic(mnemonic, password)){
+    throw new Error('Wrong seed');
   }
 
   // only ever store see here and only in ram
-  this._seed = BIP39.mnemonicToSeedHex(mnemonic, password)
+  this._seed = BIP39.mnemonicToSeedHex(mnemonic, password);
+}
+
+/**
+ * @return {boolean}
+ */
+WalletEngine.prototype.canResetSeed = function() {
+  return this.ccWallet.isInitialized() && !this.hasSeed();
 }
 
 /**
@@ -85,7 +113,7 @@ WalletEngine.prototype.setSeed = function(mnemonic, password) {
  */
 WalletEngine.prototype.initialize = function(mnemonic, password) {
   this.setSeed(mnemonic, password)
-  this.ccWallet.initialize(this._seed)
+  this.ccWallet.initialize(this.getSeed())
   this._initializeWalletEngine()
 }
 
@@ -100,7 +128,7 @@ WalletEngine.prototype._initializeWalletEngine = function() {
  * @return {AssetModel[]}
  */
 WalletEngine.prototype.getAssetModels = function() {
-  if (!this.isInitialized())
+  if (!this.ccWallet.isInitialized())
     return []
 
   return this.assetModels.getAssetModels()
@@ -109,7 +137,7 @@ WalletEngine.prototype.getAssetModels = function() {
 /**
  */
 WalletEngine.prototype.getHistory = function () {
-  if (!this.isInitialized())
+  if (!this.ccWallet.isInitialized())
     return []
 
   var assetsEntries = this.assetModels.getAssetModels().map(function(am) {
@@ -122,14 +150,14 @@ WalletEngine.prototype.getHistory = function () {
 /**
  */
 WalletEngine.prototype.update = function() {
-  if (this.isInitialized())
+  if (this.ccWallet.isInitialized())
     this.assetModels.update()
 }
 
 /**
  */
 WalletEngine.prototype.getAssetForURI = function (uri) {
-  if (!this.isInitialized())
+  if (!this.ccWallet.isInitialized())
     return null
 
   return this.assetModels.getAssetForURI(uri)
