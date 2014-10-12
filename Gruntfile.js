@@ -6,9 +6,7 @@ module.exports = function(grunt) {
         src: ['src/index.js'],
         dest: 'cc-wallet-engine.js',
         options: {
-          bundleOptions: {
-            standalone: 'ccWalletEngine'
-          }
+           standalone: 'ccWalletEngine'
         }
       },
       test: {
