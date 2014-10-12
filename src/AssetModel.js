@@ -81,8 +81,8 @@ AssetModel.prototype.getHistory = function() {
 /**
  * @return {PaymentModel}
  */
-AssetModel.prototype.makePayment = function() {
-  return new PaymentModel(this)
+AssetModel.prototype.makePayment = function(seed) {
+  return new PaymentModel(this, seed)
 }
 
 

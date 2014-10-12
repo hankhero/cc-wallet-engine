@@ -6,14 +6,12 @@ var BIP39 = require('bip39')
  *
  * @param {AssetModel} assetModel
  */
-function PaymentModel(assetModel) {
+function PaymentModel(assetModel, seed) {
   this.assetModel = assetModel
-
   this.readOnly = false
   this.status = null
   this.recipients = []
-  //this.seed = null
-  this.seed = assetModel.wallet.temp_seed
+  this.seed = seed
 }
 
 /**
