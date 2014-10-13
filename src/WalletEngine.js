@@ -1,9 +1,52 @@
 var BIP39 = require('bip39')
 var ccWallet = require('cc-wallet-core')
+var CryptoJS = require("crypto-js");
 var _ = require('lodash')
 
 var AssetModels = require('./AssetModels')
 
+/**
+ * Taken from https://code.google.com/p/crypto-js/#The_Cipher_Output
+ */
+var _JsonFormatter = { 
+    stringify: function (cipherParams) {
+        // create json object with ciphertext
+        var jsonObj = {
+            ct: cipherParams.ciphertext.toString(CryptoJS.enc.Base64)
+        };
+
+        // optionally add iv and salt
+        if (cipherParams.iv) {
+            jsonObj.iv = cipherParams.iv.toString();
+        }
+        if (cipherParams.salt) {
+            jsonObj.s = cipherParams.salt.toString();
+        }
+
+        // stringify json object
+        return JSON.stringify(jsonObj);
+    },
+
+    parse: function (jsonStr) {
+        // parse json string
+        var jsonObj = JSON.parse(jsonStr);
+
+        // extract ciphertext from json object, and create cipher params object
+        var cipherParams = CryptoJS.lib.CipherParams.create({
+            ciphertext: CryptoJS.enc.Base64.parse(jsonObj.ct)
+        });
+
+        // optionally extract iv and salt
+        if (jsonObj.iv) {
+            cipherParams.iv = CryptoJS.enc.Hex.parse(jsonObj.iv)
+        }
+        if (jsonObj.s) {
+            cipherParams.salt = CryptoJS.enc.Hex.parse(jsonObj.s)
+        }
+
+        return cipherParams;
+    }
+};
 
 /**
  * @class WalletEngine
@@ -65,6 +108,38 @@ WalletEngine.prototype.getPin = function() {
 }
 
 /**
+ * @throws {Error} If seed es not set
+ * @return {string}
+ */
+WalletEngine.prototype.getPinEncrypted = function() {
+  if (!this.hasSeed()){
+    throw new Error('No seed set');
+  }
+  var encrypted = CryptoJS.AES.encrypt(
+      this._pin, 
+      this.getSeed(), 
+      { format: _JsonFormatter }
+  );
+  return encrypted.toString()
+}
+
+/**
+ * @param {strin} pin
+ * @throws {Error} If seed es not set
+ */
+WalletEngine.prototype.setPinEncrypted = function(encryptedpin) {
+  if (!this.hasSeed()){
+    throw new Error('No seed set');
+  }
+  var decrypted = CryptoJS.AES.decrypt(
+      encryptedpin, 
+      this.getSeed(), 
+      { format: _JsonFormatter }
+  );
+  this._pin = decrypted.toString(CryptoJS.enc.Utf8)
+}
+
+/**
  * @param {strin} pin
  */
 WalletEngine.prototype.setPin = function(pin) {
@@ -91,7 +166,7 @@ WalletEngine.prototype.getSeed = function() {
  * @throws {Error} If wrong seed
  */
 WalletEngine.prototype.setSeed = function(mnemonic, password) {
-  if (this.ccWallet.isInitialized() && !this.isCurrentMnemonic(mnemonic, password)){
+  if (!!this.ccWallet.isInitialized() && !this.isCurrentMnemonic(mnemonic, password)){
     throw new Error('Wrong seed');
   }
 
