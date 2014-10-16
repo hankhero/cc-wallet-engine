@@ -88,7 +88,7 @@ AssetModel.prototype.makePayment = function(seed) {
 
 // TODO: we should create PaymentModel instead of 
 // decoding URI
-AssetModel.prototype.decodePaymentURI = function (uri) {
+AssetModel.prototype.makePaymentFromURI = function (uri) {
   var params = decode_bitcoin_uri(uri)
   if (!params || !params.address)
     throw new Error('wrong payment URI')
