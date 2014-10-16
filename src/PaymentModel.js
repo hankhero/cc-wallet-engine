@@ -30,6 +30,10 @@ PaymentModel.prototype.getTotalAmount = function () {
     return assetdef.formatValue(sum);
 }
 
+PaymentModel.prototype.getRecipients = function () {
+    return this.recipients;
+};
+
 
 /**
  * @param {string} address

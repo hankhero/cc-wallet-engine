@@ -15,7 +15,7 @@
     "url": "https://github.com/chromaway/cc-wallet-engine"
   },
   "dependencies": {
-    "bip39": "2.1.0",
+    "bip39": "git://github.com/killerstorm/bip39.git",
     "cc-wallet-core": "git://github.com/chromaway/cc-wallet-core.git#v0.0.3",
     "coloredcoinjs-lib": "git://github.com/chromaway/coloredcoinjs-lib.git#v0.0.5",
     "lodash": "2.4.1",
