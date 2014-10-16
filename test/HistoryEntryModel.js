@@ -1,6 +1,6 @@
 var expect = require('chai').expect
 
-var ccWallet = require('cc-wallet-core')
+var ccWallet = require('cc-wallet-core').Wallet
 var _ = require('lodash')
 var moment = require('moment')
 
