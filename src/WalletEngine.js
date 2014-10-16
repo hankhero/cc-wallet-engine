@@ -1,8 +1,7 @@
 var BIP39 = require('bip39')
-var ccWallet = require('cc-wallet-core')
+var ccWallet = require('cc-wallet-core').Wallet;
 var CryptoJS = require("crypto-js");
 var _ = require('lodash')
-
 var AssetModels = require('./AssetModels')
 
 /**
