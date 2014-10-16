@@ -13,5 +13,4 @@ Fanatid master:
 
 Hankhero master:
 [![BuildStatus](https://travis-ci.org/hankhero/cc-wallet-engine.svg?branch=master)](https://travis-ci.org/hankhero/cc-wallet-engine)
-[![Coverage Status](https://coveralls.io/repos/hankherohankhero/cc-wallet-engine/badge.png)](https://coveralls.io/r/hankhero/cc-wallet-engine)
-
+![Coverage Status](https://coveralls.io/repos/hankhero/cc-wallet-engine/badge.png)](https://coveralls.io/r/hankhero/cc-wallet-engine)
