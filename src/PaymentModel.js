@@ -14,6 +14,23 @@ function PaymentModel(assetModel, seed) {
   this.seed = seed
 }
 
+PaymentModel.prototype.setSeed = function (seed) {
+    this.seed = seed;
+};
+
+PaymentModel.prototype.getAssetModel = function () {
+    return this.assetModel;
+}
+PaymentModel.prototype.getTotalAmount = function () {
+    var assetdef = this.assetModel.assetdef;
+    var sum = 0;
+    this.recipients.forEach(function (recp) {
+            sum += assetdef.parseValue(recp.amount);
+    });
+    return assetdef.formatValue(sum);
+}
+
+
 /**
  * @param {string} address
  * @return {boolean}
@@ -48,31 +65,6 @@ PaymentModel.prototype.addRecipient = function(address, amount) {
     throw new Error('payment has already been comitted')
 
   this.recipients.push({ address: address, amount: amount })
-
-  return this
-}
-
-/**
- * @param {string} mnemonic
- * @param {string} password
- * @return {boolean}
- */
-PaymentModel.prototype.checkMnemonic = function(mnemonic, password) {
-  var seed = BIP39.mnemonicToSeedHex(mnemonic, password)
-  return this.assetModel.wallet.isCurrentSeed(seed)
-}
-
-/**
- * @param {string} mnemonic
- * @param {string} password
- * @return {PaymentModel}
- * @throws {Error} If payment already sent
- */
-PaymentModel.prototype.setMnemonic = function(mnemonic, password) {
-  if (this.readOnly)
-    throw new Error('payment has already been comitted')
-
-  this.seed = BIP39.mnemonicToSeedHex(mnemonic, password)
 
   return this
 }
