@@ -15,12 +15,14 @@ var decode_bitcoin_uri = require('./uri_decoder').decode_bitcoin_uri
  *
  * Event 'update': triggered on one of props properties updated
  *
+ * @param {cc-wallet-engine.WalletEngine} walletEngine
  * @param {cc-wallet-core.Wallet} wallet
  * @param {cc-wallet-core.asset.AssetDefinition} assetdef
  */
-function AssetModel(wallet, assetdef) {
+function AssetModel(walletEngine, wallet, assetdef) {
   events.EventEmitter.call(this)
 
+  this.walletEngine = walletEngine
   this.wallet = wallet
   this.assetdef = assetdef
 
@@ -81,13 +83,10 @@ AssetModel.prototype.getHistory = function() {
 /**
  * @return {PaymentModel}
  */
-AssetModel.prototype.makePayment = function(seed) {
-  return new PaymentModel(this, seed)
+AssetModel.prototype.makePayment = function() {
+  return new PaymentModel(this, this.walletEngine.getSeed())
 }
 
-
-// TODO: we should create PaymentModel instead of 
-// decoding URI
 AssetModel.prototype.makePaymentFromURI = function (uri) {
   var params = decode_bitcoin_uri(uri)
   if (!params || !params.address)
@@ -103,7 +102,9 @@ AssetModel.prototype.makePaymentFromURI = function (uri) {
   if (asset_id != 'JNu4AFCBNmTE1')
     coloraddress = asset_id + "@" + coloraddress
 
-  return { address: coloraddress, amount: params.amount }
+  var payment = this.makePayment();
+  payment.addRecipient(coloraddress, params.amount);
+  return payment;
 }
 
 

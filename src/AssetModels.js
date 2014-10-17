@@ -16,11 +16,12 @@ var decode_bitcoin_uri = require('./uri_decoder').decode_bitcoin_uri
  * Inhertis events.EventEmitter
  * Event 'update': triggered on assetModels updated
  */
-function AssetModels(wallet) {
+function AssetModels(wallet. walletEngine) {
   events.EventEmitter.call(this)
 
   this.models = {}
   this.wallet = wallet
+  this.walletEngine = walletEngine
 }
 
 util.inherits(AssetModels, events.EventEmitter)
@@ -48,7 +49,7 @@ AssetModels.prototype.update = function() {
     var assetId = assetdef.getId()
 
     if (_.isUndefined(self.models[assetId])) {
-      self.models[assetId] = new AssetModel(self.wallet, assetdef)
+      self.models[assetId] = new AssetModel(self.walletEngine, self.wallet, assetdef)
       self.models[assetId].on('update', function() { self.emit('update') })
 
       self.emit('update')
