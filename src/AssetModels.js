@@ -16,7 +16,7 @@ var decode_bitcoin_uri = require('./uri_decoder').decode_bitcoin_uri
  * Inhertis events.EventEmitter
  * Event 'update': triggered on assetModels updated
  */
-function AssetModels(wallet. walletEngine) {
+function AssetModels(wallet, walletEngine) {
   events.EventEmitter.call(this)
 
   this.models = {}

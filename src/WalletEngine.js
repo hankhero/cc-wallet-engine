@@ -194,7 +194,7 @@ WalletEngine.prototype.initialize = function(mnemonic, password) {
 /**
  */
 WalletEngine.prototype._initializeWalletEngine = function() {
-  this.assetModels = new AssetModels(this.ccWallet)
+  this.assetModels = new AssetModels(this.ccWallet, this)
   this.assetModels.on('update', function() { this.updateCallback() }.bind(this))
 }
 
