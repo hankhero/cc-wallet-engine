@@ -1,7 +1,7 @@
 var expect = require('chai').expect
 
 var _ = require('lodash')
-var ccWallet = require('cc-wallet-core')
+var ccWallet = require('cc-wallet-core').Wallet
 
 var AssetModels = require('../src/AssetModels')
 var AssetModel = require('../src/AssetModel')

@@ -1,7 +1,7 @@
 var expect = require('chai').expect
 
 var BIP39 = require('bip39')
-var ccWallet = require('cc-wallet-core')
+var ccWallet = require('cc-wallet-core').Wallet
 
 var AssetModel = require('../src/AssetModel')
 var PaymentModel = require('../src/PaymentModel')

@@ -1,9 +1,8 @@
 var BIP39 = require('bip39')
-var ccWallet = require('cc-wallet-core')
+var ccWallet = require('cc-wallet-core').Wallet;
 var CryptoJS = require("crypto-js");
 var _ = require('lodash')
 var store = require('store');
-
 var AssetModels = require('./AssetModels')
 
 /**
@@ -221,7 +220,7 @@ WalletEngine.prototype.initialize = function(mnemonic, password, pin) {
 /**
  */
 WalletEngine.prototype._initializeWalletEngine = function() {
-  this.assetModels = new AssetModels(this.ccWallet)
+  this.assetModels = new AssetModels(this.ccWallet, this)
   this.assetModels.on('update', function() { this.updateCallback() }.bind(this))
 }
 
@@ -257,12 +256,36 @@ WalletEngine.prototype.update = function() {
 
 /**
  */
-WalletEngine.prototype.getAssetForURI = function (uri) {
+WalletEngine.prototype.makePaymentFromURI = function (uri, cb) {
   if (!this.ccWallet.isInitialized())
-    return null
+    return cb(new Error('not initialized'));
 
-  return this.assetModels.getAssetForURI(uri)
-}
+  if (cwpp.is_cwpp_uri(uri)) {
+      var pm = new CWPPPaymentModel(this.ccWallet, uri);
+      if (this.hasSeed())
+          pm.setSeed(this.getSeed());
+      pm.initialize(function (err) {
+                        if (err) cb(err);
+                        else cb(null, pm);
+                    });
+  } else {
+      try {
+          var asset = this.assetModels.getAssetForURI(uri);
+          if (!asset) cb(new Error('asset not recognized'));
+          else {
+              var pm = asset.makePaymentFromURI(uri);
+              if (this.hasSeed())
+                  pm.setSeed(this.getSeed());
+              cb(null, pm);
+          }         
+      } catch (x) {
+          cb(x);
+      }
+  }
+};
+
+
+
 
 
 module.exports = WalletEngine
