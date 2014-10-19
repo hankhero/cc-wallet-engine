@@ -2,6 +2,7 @@ var BIP39 = require('bip39')
 var ccWallet = require('cc-wallet-core').Wallet;
 var CryptoJS = require("crypto-js");
 var _ = require('lodash')
+var store = require('store');
 var AssetModels = require('./AssetModels')
 
 /**
@@ -173,22 +174,47 @@ WalletEngine.prototype.setSeed = function(mnemonic, password) {
   this._seed = BIP39.mnemonicToSeedHex(mnemonic, password);
 }
 
+WalletEngine.prototype.stored_mnemonic = function() {
+  return store.get('cc-wallet-engine__mnemonic');
+}
+
+WalletEngine.prototype.stored_encryptedpin = function() {
+  return store.get('cc-wallet-engine__encryptedpin');
+}
+
 /**
  * @return {boolean}
  */
 WalletEngine.prototype.canResetSeed = function() {
-  return this.ccWallet.isInitialized() && !this.hasSeed();
+  return (
+    !this.hasSeed() && 
+    !!this.stored_mnemonic() && 
+    !!this.stored_encryptedpin() && 
+    this.ccWallet.isInitialized()
+  );
+}
+
+WalletEngine.prototype.resetSeed = function(password) {
+  if (!this.canResetSeed()){
+    throw new Error('Cannot reset seed!');
+  }
+  this.setSeed(this.stored_mnemonic(), password);
+  this.setPinEncrypted(this.stored_encryptedpin());
 }
 
 /**
  * @param {string} mnemonic
  * @param {string} [password]
+ * @param {string} pin
  * @throws {Error} If already initialized
  */
-WalletEngine.prototype.initialize = function(mnemonic, password) {
+WalletEngine.prototype.initialize = function(mnemonic, password, pin) {
   this.setSeed(mnemonic, password)
   this.ccWallet.initialize(this.getSeed())
   this._initializeWalletEngine()
+  this.setPin(pin);
+  store.set('cc-wallet-engine__mnemonic', mnemonic);
+  store.set('cc-wallet-engine__encryptedpin', this.getPinEncrypted());
 }
 
 /**
