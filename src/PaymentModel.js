@@ -1,9 +1,11 @@
-var BIP39 = require('bip39')
-
+/**
+ * @typedef {Object} RecipientObject
+ * @property {string} address
+ * @property {string} amount
+ */
 
 /**
  * @class PaymentModel
- *
  * @param {AssetModel} assetModel
  */
 function PaymentModel(assetModel, seed) {
@@ -14,25 +16,39 @@ function PaymentModel(assetModel, seed) {
   this.seed = seed
 }
 
-PaymentModel.prototype.setSeed = function (seed) {
-    this.seed = seed;
-};
-
-PaymentModel.prototype.getAssetModel = function () {
-    return this.assetModel;
-}
-PaymentModel.prototype.getTotalAmount = function () {
-    var assetdef = this.assetModel.assetdef;
-    var sum = 0;
-    this.recipients.forEach(function (recp) {
-            sum += assetdef.parseValue(recp.amount);
-    });
-    return assetdef.formatValue(sum);
+/**
+ * @param {string} seed
+ */
+PaymentModel.prototype.setSeed = function(seed) {
+  this.seed = seed
 }
 
-PaymentModel.prototype.getRecipients = function () {
-    return this.recipients;
-};
+/**
+ * @return {AssetModel}
+ */
+PaymentModel.prototype.getAssetModel = function() {
+  return this.assetModel
+}
+
+/**
+ * @return {string}
+ */
+PaymentModel.prototype.getTotalAmount = function() {
+  var assetdef = this.getAssetModel().assetdef
+
+  var amount = this.getRecipients().reduce(function(sum, recipient) {
+    return sum + assetdef.parseValue(recipient.amount)
+  }, 0)
+
+  return assetdef.formatValue(amount)
+}
+
+/**
+ * @return {RecipientObject[]}
+ */
+PaymentModel.prototype.getRecipients = function() {
+  return this.recipients
+}
 
 
 /**
@@ -41,8 +57,7 @@ PaymentModel.prototype.getRecipients = function () {
  */
 PaymentModel.prototype.checkAddress = function(address) {
   var assetdef = this.assetModel.assetdef
-  var isValid = this.assetModel.wallet.checkAddress(assetdef, address)
-  return isValid
+  return this.assetModel.wallet.checkAddress(assetdef, address)
 }
 
 /**
@@ -85,41 +100,41 @@ PaymentModel.prototype.addRecipient = function(address, amount) {
  */
 PaymentModel.prototype.send = function(cb) {
   var self = this
-  if (this.readOnly)
+  if (self.readOnly)
     throw new Error('Payment has already been comitted')
 
-  if (this.recipients.length === 0)
+  if (self.recipients.length === 0)
     throw new Error('Recipients list is empty')
 
-  if (this.seed === null)
+  if (self.seed === null)
     throw new Error('Mnemonic not set')
 
-  var assetdef = this.assetModel.assetdef
+  var assetdef = self.assetModel.assetdef
 
-  var rawTargets = this.recipients.map(function(recipient) {
+  var rawTargets = self.getRecipients().map(function(recipient) {
     return {
-      address: this.assetModel.wallet.getBitcoinAddress(assetdef, recipient.address),
+      address: self.assetModel.wallet.getBitcoinAddress(assetdef, recipient.address),
       value: assetdef.parseValue(recipient.amount)
     }
-  }.bind(this))
+  })
 
-  this.readOnly = true
-  this.status = 'sending'
+  self.readOnly = true
+  self.status = 'sending'
 
-  function sendCoinsCallback(err, txid) {
-    if (err)
-      console.error(err)
+  function sendCoinsCallback(error, txId) {
+    if (error)
+      console.error(error)
 
-    self.status = err ? 'failed' : 'send'
+    self.status = error ? 'failed' : 'send'
     self.assetModel.update()
 
-    cb(err, txid)
+    cb(error, txId)
   }
 
-  this.assetModel.wallet.sendCoins(
-    this.seed, this.assetModel.assetdef, rawTargets, sendCoinsCallback)
+  self.assetModel.wallet.sendCoins(
+    self.seed, self.assetModel.assetdef, rawTargets, sendCoinsCallback)
 
-  return this
+  return self
 }
 
 // 'fresh', 'sending', 'sent', 'failed'

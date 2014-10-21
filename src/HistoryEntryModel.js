@@ -1,11 +1,9 @@
-var _ = require('lodash')
 var moment = require('moment')
-var AssetTargetModel = require('./AssetTargetModel');
+var AssetTargetModel = require('./AssetTargetModel')
 
 
 /**
  * @class HistoryEntryModel
- *
  * @param {historyEntry} HistoryEntry
  */
 function HistoryEntryModel(historyEntry) {

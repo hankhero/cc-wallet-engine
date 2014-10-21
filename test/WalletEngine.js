@@ -24,17 +24,17 @@ describe('WalletEngine', function() {
   it('initialize', function() {
     expect(walletEngine.isInitialized()).to.be.false
     var mnemonic = walletEngine.generateMnemonic(),
-        password = 'qwerty';
+        password = 'qwerty'
     walletEngine.initialize(mnemonic, password)
-    walletEngine.setPin('1234');
+    walletEngine.setPin('1234')
     expect(walletEngine.isInitialized()).to.be.true
   })
 
   it('getAssetModels', function(done) {
     var mnemonic = walletEngine.generateMnemonic(),
-        password = 'qwerty';
+        password = 'qwerty'
     walletEngine.initialize(mnemonic, password)
-    walletEngine.setPin('1234');
+    walletEngine.setPin('1234')
 
     walletEngine.setCallback(function() {
       walletEngine.getAssetModels().forEach(function(assetModel) {

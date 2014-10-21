@@ -3,17 +3,17 @@ var util = require('util')
 
 var HistoryEntryModel = require('./HistoryEntryModel')
 var PaymentModel = require('./PaymentModel')
-var _ = require('lodash')
 
 var decode_bitcoin_uri = require('./uri_decoder').decode_bitcoin_uri
 
 
 /**
+ * @event AssetModel#update
+ */
+
+/**
  * @class AssetModel
- *
- * Inhertis events.EventEmitter
- *
- * Event 'update': triggered on one of props properties updated
+ * @extends events.EventEmitter
  *
  * @param {cc-wallet-engine.WalletEngine} walletEngine
  * @param {cc-wallet-core.Wallet} wallet
@@ -87,26 +87,29 @@ AssetModel.prototype.makePayment = function() {
   return new PaymentModel(this, this.walletEngine.getSeed())
 }
 
+/**
+ * @param {string} uri
+ * @return {PaymentModel}
+ * @throws {Error}
+ */
 AssetModel.prototype.makePaymentFromURI = function (uri) {
   var params = decode_bitcoin_uri(uri)
   if (!params || !params.address)
     throw new Error('wrong payment URI')
 
-  var asset_id = params.asset_id
-  if (!asset_id)
-    asset_id = 'JNu4AFCBNmTE1' // asset_id for bitcoin
-  if (asset_id != this.assetdef.getId())
+  // by default assetId for bitcoin
+  var assetId = params.asset_id || 'JNu4AFCBNmTE1'
+  if (assetId !== this.assetdef.getId())
     throw new Error('wrong payment URI (wrong asset)')
 
-  var coloraddress = params.address
-  if (asset_id != 'JNu4AFCBNmTE1')
-    coloraddress = asset_id + "@" + coloraddress
+  var colorAddress = params.address
+  if (assetId !== 'JNu4AFCBNmTE1')
+    colorAddress = assetId + '@' + colorAddress
 
-  var payment = this.makePayment();
-  payment.addRecipient(coloraddress, params.amount);
-  return payment;
+  var payment = this.makePayment()
+  payment.addRecipient(colorAddress, params.amount)
+  return payment
 }
-
 
 /**
  * Update current AssetModel

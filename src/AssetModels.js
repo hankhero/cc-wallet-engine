@@ -9,12 +9,14 @@ var decode_bitcoin_uri = require('./uri_decoder').decode_bitcoin_uri
 
 
 /**
+ * @event AssetModels#update
+ */
+
+/**
  * @class AssetModels
+ * @extends events.EventEmitter
  *
  * @param {cc-wallet-core.Wallet} wallet
- *
- * Inhertis events.EventEmitter
- * Event 'update': triggered on assetModels updated
  */
 function AssetModels(wallet, walletEngine) {
   events.EventEmitter.call(this)
@@ -59,16 +61,18 @@ AssetModels.prototype.update = function() {
   })
 }
 
-AssetModels.prototype.getAssetForURI = function (uri) {
+/**
+ * @param {string} uri
+ * @return {?AssetModel}
+ */
+AssetModels.prototype.getAssetForURI = function(uri) {
   var params = decode_bitcoin_uri(uri)
   if (!params || !params.address)
     return null
 
-  var asset_id = params.asset_id
-  if (!asset_id)
-    asset_id = 'JNu4AFCBNmTE1' // asset_id for bitcoin
-
-  return this.models[asset_id]
+  // by default assetId for bitcoin
+  var assetId = params.asset_id || 'JNu4AFCBNmTE1'
+  return this.models[assetId]
 }
 
 

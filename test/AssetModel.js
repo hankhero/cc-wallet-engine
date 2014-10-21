@@ -1,6 +1,6 @@
 var expect = require('chai').expect
 
-var ccWallet = require('cc-wallet-core').Wallet;
+var ccWallet = require('cc-wallet-core').Wallet
 
 var AssetModel = require('../src/AssetModel')
 var HistoryEntryModel = require('../src/HistoryEntryModel')
