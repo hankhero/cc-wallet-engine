@@ -1,4 +1,4 @@
-//var bitcoin = require('coloredcoinjs-lib').bitcoin
+//var bitcoin = require('cc-wallet-core').cclib.bitcoin
 
 /**
  * @class AssetTargetModel
@@ -7,7 +7,7 @@
 function AssetTargetModel(assetTarget) {
   this.address = "FIXME get address"
   //Todo
-  //var script = bitcoin.Script.fromBuffer/Hex(assetTarget.getScript())
+  //var script = bitcoin.Script.fromHex(assetTarget.getScript())
   //var net = bitcoin.networks.testnet; // TODO wher to get current network?
   //this.address = bitcoin.Address.fromOutputScript(script, net).toBase58Check()
 
