@@ -22,7 +22,7 @@ PaymentRequestModel.prototype.getPaymentURI = function (cb) {
 
     request({
         method: "POST", 
-        uri: "http://localhost:4242/cwpp/new-reqest",
+        uri: "http://localhost:4242/cwpp/new-request",
         body: JSON.stringify(this.cwppPayReq)},
         function (err, response, body) {
             if (err) return cb(err);

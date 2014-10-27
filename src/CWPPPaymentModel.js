@@ -5,7 +5,7 @@ var cwpp = require('./cwpp')
 var cclib = require('cc-wallet-core').cclib
 var OperationalTx = require('cc-wallet-core').tx.OperationalTx
 var RawTx = require('cc-wallet-core').tx.RawTx
-
+var cclib = require('coloredcoinjs-lib')
 
 /**
  * @class CWPPPaymentModel

@@ -240,7 +240,7 @@ WalletEngine.prototype.makePaymentFromURI = function(uri, cb) {
   }
 
   if (cwpp.is_cwpp_uri(uri)) {
-    paymentModel = new CWPPPaymentModel(this.ccWallet, uri)
+    paymentModel = new CWPPPaymentModel(this, uri)
     if (this.hasSeed())
       paymentModel.setSeed(this.getSeed())
 
