@@ -1,4 +1,4 @@
-/**
+/**n
  */
 exports.make_cinputs_payment_request = function(value, address, assetId, colorDesc) {
   return {
@@ -8,7 +8,7 @@ exports.make_cinputs_payment_request = function(value, address, assetId, colorDe
     value: value,
     address: address,
     colorDesc: colorDesc,
-    assetid: assetId
+    assetId: assetId
   }
 }
 

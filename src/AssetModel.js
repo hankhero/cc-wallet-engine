@@ -3,6 +3,8 @@ var util = require('util')
 
 var HistoryEntryModel = require('./HistoryEntryModel')
 var PaymentModel = require('./PaymentModel')
+var PaymentRequestModel = require('./PaymentRequestModel')
+var _ = require('lodash')
 
 var decode_bitcoin_uri = require('./uri_decoder').decode_bitcoin_uri
 
@@ -86,6 +88,11 @@ AssetModel.prototype.getHistory = function() {
 AssetModel.prototype.makePayment = function() {
   return new PaymentModel(this, this.walletEngine.getSeed())
 }
+
+AssetModel.prototype.makePaymentRequest = function (props) {
+    return new PaymentRequestModel(
+        this.wallet, this.assetdef, props);
+};
 
 /**
  * @param {string} uri
