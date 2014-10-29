@@ -5,7 +5,6 @@ var cwpp = require('./cwpp')
 var cclib = require('cc-wallet-core').cclib
 var OperationalTx = require('cc-wallet-core').tx.OperationalTx
 var RawTx = require('cc-wallet-core').tx.RawTx
-var cclib = require('coloredcoinjs-lib')
 
 /**
  * @class CWPPPaymentModel
@@ -52,7 +51,7 @@ CWPPPaymentModel.prototype.initialize = function (cb) {
     self.payreq = JSON.parse(body)
 
     var assetId = self.payreq.assetId
-    self.assetModel = self.walletEngine.getAssetModels().models[assetId]
+    self.assetModel = self.walletEngine.assetModels.models[assetId]
     if (!self.assetModel)
       return cb(new Error('asset not found'))
 
@@ -194,16 +193,15 @@ CWPPPaymentModel.prototype.send = function(cb) {
     if (error)
       return fail(error)
 
-    var msg = cwpp.make_cinputs_proc_req_1(colordef.getColorDesc(), cinputs, change)
+    var msg = cwpp.make_cinputs_proc_req_1(colordef.getDesc(), cinputs, change)
     cwppProcess(msg, function(resp) {
-      var rawTx = RawTx.fromHex(resp.tx)
+      var rawTx = RawTx.fromHex(resp.tx_data)
       // TODO: check before signing tx!
-      // wallet.transformTx(rawTx, 'signed', self.seed, function(error, tx) {
-      transformTx(rawTx, 'signed', {wallet: wallet, seed: self.seed}, function(error, tx) {
+      wallet.transformTx(rawTx, 'partially-signed', self.seed, function(error, tx) {
         if (error)
           return fail(error)
 
-        msg = cwpp.make_cinputs_proc_req_2(tx.toHex())
+        msg = cwpp.make_cinputs_proc_req_2(tx.toHex(true))
         cwppProcess(msg, function(resp) {
           // Todo: need load tx
           self.publishTx(resp.tx, cb)
