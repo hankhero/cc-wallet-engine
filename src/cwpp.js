@@ -38,6 +38,10 @@ exports.make_cinputs_proc_req_2 = function(tx) {
   }
 }
 
+exports.make_cwpp_uri = function (host, hash) {
+    return "cwpp:http://" + host + "/cwpp/" + hash;  
+}
+
 /**
  * @param {string} uri
  * @return {boolean}

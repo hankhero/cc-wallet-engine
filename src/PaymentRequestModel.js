@@ -7,9 +7,10 @@ function PaymentRequestModel(wallet, assetdef, props) {
     this.assetdef = assetdef;
     this.props = props;
     this.paymentURI = null;
-    assert(props.address, 'Address must be provided');
     assert(props.amount, 'Amount must be provided');
-    
+    if (!props.address) {
+        props.address = wallet.getSomeAddress(assetdef, false);
+    }    
 
     var value = assetdef.parseValue(props.amount);
     this.cwppPayReq = cwpp.make_cinputs_payment_request(
@@ -29,7 +30,7 @@ PaymentRequestModel.prototype.getPaymentURI = function (cb) {
             if (response.statusCode !== 200)
                 return cb(new Error("request failed"));
             var json = JSON.parse(body);
-            this.paymentURI = "http://localhost:4242/cwpp/" + json.hash;
+            this.paymentURI = cwpp.make_cwpp_uri('localhost:4242', json.hash);
             return cb(null, this.paymentURI);
         });
 };
