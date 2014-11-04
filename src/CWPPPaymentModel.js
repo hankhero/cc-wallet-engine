@@ -109,34 +109,6 @@ CWPPPaymentModel.prototype.selectCoins = function(cb) {
   })
 }
 
-/**
- * @callback CWPPPaymentModel~publishTx
- * @param {?Error} error
- * @param {string} txId
- */
-
-/**
- * @param {*} tx
- * @param {CWPPPaymentModel~publishTx} cb
- */
-CWPPPaymentModel.prototype.publishTx = function(tx, cb) {
-  // TODO: This code is from cc-wallet-core.Wallet, refactor later
-  var self = this.walletEngine.ccWallet
-  var signedTx = tx
-
-  Q.ninvoke(self.getBlockchain(), 'sendTx', tx).then(function () {
-    var timezoneOffset = new Date().getTimezoneOffset() * 60
-    var data = {
-      tx: signedTx,
-      timestamp: Math.round(+new Date()/1000) + timezoneOffset
-    }
-    return Q.ninvoke(self.getTxDb(), 'addUnconfirmedTx', data)
-
-  }).then(function() {
-    return signedTx.getId()
-
-  }).done(function(txId) { cb(null, txId) }, function(error) { cb(error) })
-}
 
 /**
  * @callback CWPPPaymentModel~send
@@ -203,8 +175,8 @@ CWPPPaymentModel.prototype.send = function(cb) {
 
         msg = cwpp.make_cinputs_proc_req_2(tx.toHex(true))
         cwppProcess(msg, function(resp) {
-          // Todo: need load tx
-          self.publishTx(resp.tx, cb)
+            var rawTx = RawTx.fromHex(resp.tx_data);
+            wallet.sendTx(rawTx.toTransaction(), cb);
         })
       })
     })
