@@ -1,6 +1,6 @@
 var events = require('events')
 var util = require('util')
-
+var cumulativeDelayed = require('delayed').cumulativeDelayed
 var _ = require('lodash')
 
 var AssetModel = require('./AssetModel')
@@ -24,6 +24,11 @@ function AssetModels(wallet, walletEngine) {
   this.models = {}
   this.wallet = wallet
   this.walletEngine = walletEngine
+
+  var delayedUpdate = cumulativeDelayed(function () {this.update()}.bind(this), 100)
+
+  this.wallet.getTxDb().on('update', delayedUpdate)
+  this.wallet.getTxDb().on('error', delayedUpdate)
 }
 
 util.inherits(AssetModels, events.EventEmitter)

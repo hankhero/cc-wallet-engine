@@ -3,10 +3,12 @@ var ccWallet = require('cc-wallet-core').Wallet
 var CryptoJS = require("crypto-js")
 var _ = require('lodash')
 var store = require('store')
+var cumulativeDelayed = require('delayed').cumulativeDelayed
 var AssetModels = require('./AssetModels')
 var JsonFormatter = require('./JsonFormatter')
 var cwpp = require('./cwpp')
 var CWPPPaymentModel = require('./CWPPPaymentModel')
+
 
 /**
  * @class WalletEngine
@@ -187,7 +189,8 @@ WalletEngine.prototype.initialize = function(mnemonic, password, pin) {
  */
 WalletEngine.prototype._initializeWalletEngine = function() {
   this.assetModels = new AssetModels(this.ccWallet, this)
-  this.assetModels.on('update', function() { this.updateCallback() }.bind(this))
+  var delayedUpdate = cumulativeDelayed(function() { this.updateCallback() }.bind(this), 100)
+  this.assetModels.on('update', delayedUpdate)
 }
 
 /**
